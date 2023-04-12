@@ -1,14 +1,35 @@
 const Order = require("./../models/order");
+const aleaRNGFactory = require("number-generator/lib/aleaRNGFactory");
+const { uInt32 } = aleaRNGFactory(2);
 
 exports.postOrder = async(req, res, next) =>{
+    console.log(">>>>>>>>>>>")
+
     try {
-        const order = await Order.create(req.body);
-        if(order){
-            res.status(200).json({
-                message:"Order Created!",
-                order
-            })
+        const orderObj={
+            diameter:req.body.diameter,
+            length:req.body.length,
+            make:req.body.make,
+            quantity:req.body.quantity,
+            orderId:uInt32(),
+            type:req.body.type,
+            userId:req.body.userId
+    
         }
+        const order = await new Order(orderObj);
+        await order.save().then((result) => {
+
+            res.status(201).json({ message: 'order Created Successfully!', status: '201', orderId: result.orderId, });
+        })
+        .catch(err => {
+            res.status(500).json({ error: err.message, message: 'Something went wrong!' })
+        })
+        // if(order){
+        //     res.status(200).json({
+        //         message:"Order Created!",
+        //         order
+        //     })
+        // }
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"

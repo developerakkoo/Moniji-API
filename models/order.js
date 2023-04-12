@@ -5,12 +5,12 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
     diameter:{
-        type: number,
+        type: Number,
         required: [true]
     },
 
     length:{
-        type: number,
+        type:Number,
         required: [true]
     },
 
@@ -20,22 +20,29 @@ const orderSchema = new Schema({
     },
 
     quantity:{
-        type: number,
+        type: Number,
         required: [true]
     },
 
-    orderid:{
-        type: number,
+    orderId:{
+        type: Number,
         required: [true]
     },
     status:{
-        type: number,
-        required: [true]
+        type: Number,
+        default:1
     },
 
     type:{
         type: String,
         required: [true]
+    },
+    message:{
+        type: String,
+    },
+    isAccepted:{
+        type: Boolean,
+        default:false
     },
 
     userId:{

@@ -10,14 +10,14 @@ const multer = require("multer");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 
-const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mongodb.net/moniji?retryWrites=true&w=majority";
-
+// const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mongodb.net/moniji?retryWrites=true&w=majority";
+const MONGODB_URI ="mongodb://localhost:27017/moniji_App";
 
 //ROUTES
 
 const adminRoute = require("./routes/admin");
 const userRoute = require("./routes/user");
-
+const orderRoute = require("./routes/order");
 
 
 const app = express();
@@ -30,7 +30,7 @@ app.use(cors());
 
 app.use(adminRoute);
 app.use(userRoute);
-
+app.use(orderRoute);
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -81,9 +81,9 @@ const diskStorage = multer.diskStorage({
     });
   });
   
-  app.all("*", (req, res, next) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
-  });
+  // app.all("*", (req, res, next) => {
+  //   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+  // });
   
   mongoose
     .connect(MONGODB_URI, {
@@ -93,6 +93,7 @@ const diskStorage = multer.diskStorage({
     })
     .then((result) => {
       const server = app.listen(8080);
+      console.log("app is running")
       const io = require("./socket").init(server);
   
       io.on("connection", (socket) => {

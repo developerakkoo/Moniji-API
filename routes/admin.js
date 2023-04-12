@@ -14,6 +14,12 @@ router.post('/signup',
     ],
     authController.postSignup);
 
+router.put('/updateUser/status/:id',authController.acceptUserReq)
+
+router.put('/updateOrder/:id',authController.UpdateOrderReq);
+
+router.put('/updateOrder/Status/:id',authController.UpdateOrderStatus)
+
 
 
 

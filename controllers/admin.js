@@ -1,4 +1,6 @@
 const Admin = require('../models/admin');
+const User = require('../models/user');
+const Order = require("./../models/order");
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -6,7 +8,7 @@ const bcrypt = require('bcryptjs');
 
 
 
-exports.postLogin = (req, res, next) => {
+const postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -48,7 +50,7 @@ exports.postLogin = (req, res, next) => {
 }
 
 
-exports.postSignup = (req, res, next) => {
+const postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -74,7 +76,7 @@ exports.postSignup = (req, res, next) => {
         })
     })
     
-   .catch(err =>{
+   .catch(error =>{
     res.status(400).json({message: error.message, status:'error'});
     })
 
@@ -83,3 +85,73 @@ exports.postSignup = (req, res, next) => {
 }
 
 
+async function acceptUserReq(req, res, next){
+    const savedAdmin =  await Admin.findOne({_id:req.params.id});
+    if (!savedAdmin){
+        res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const savedUser = await User.findOne({_id:req.body.id});
+    if(!savedUser){
+        res.status(400).json({message: 'User dose not exist !'});
+    }
+    savedUser.isActive = req.body.isActive ? req.body.isActive :savedUser.isActive
+
+    const UpdatedUser = await savedUser.save();
+    const postResponse={
+        userId:UpdatedUser._id,
+        isActive:UpdatedUser.isActive
+    }
+    res.status(200).json({message: 'User updated Successfully!',postResponse});
+}
+
+async function UpdateOrderReq(req, res, next){
+    const savedAdmin =  await Admin.findOne({_id:req.params.id});
+    if (!savedAdmin){
+        res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const savedOrder = await Order.findOne({_id:req.body.id});
+    if(!savedOrder){
+        res.status(400).json({message: 'Order dose not exist !'});
+    }
+    savedOrder.isAccepted = req.body.isAccepted ? req.body.isAccepted :savedOrder.isAccepted
+    
+    const updateOrder = await savedOrder.save();
+const  postResponse={
+    isAccepted:updateOrder.isAccepted
+
+}
+    res.status(200).json({message: 'Order updated Successfully!',postResponse});
+}
+
+
+
+async function UpdateOrderStatus(req, res, next){
+    const savedAdmin =  await Admin.findOne({_id:req.params.id});
+    if (!savedAdmin){
+        res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const savedOrder = await Order.findOne({_id:req.body.id});
+    if(!savedOrder){
+        res.status(400).json({message: 'Order dose not exist !'});
+    }
+    savedOrder.status = req.body.status ? req.body.status :savedOrder.status
+    savedOrder.message = req.body.message ? req.body.message :savedOrder.message
+    if(req.body.status==3){
+        savedOrder.isAccepted = false
+    }
+    const updateOrder = await savedOrder.save();
+const  postResponse={
+    status:updateOrder.status,
+    message:updateOrder.message,
+    isAccepted:updateOrder.isAccepted
+
+}
+    res.status(200).json({message: 'Order updated Successfully!',postResponse});
+}
+
+module.exports={
+    acceptUserReq,
+    postLogin,
+    postSignup,
+    UpdateOrderReq,
+    UpdateOrderStatus}

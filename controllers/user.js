@@ -14,7 +14,11 @@ exports.loginUser = async (req, res, next) => {
     User.findOne({ email: email })
         .then(user => {
             if (!user) {
-                res.status(200).json({ message: 'User not found', status: 'error' })
+                res.status(200).json({ message: 'User not found', status: 'error' });
+            }
+            if(user.isActive==false){
+                res.status(200).json({ message: 'Not verified', status: 'error' });
+
             }
 
             loadedUser = user;
@@ -51,7 +55,7 @@ exports.loginUser = async (req, res, next) => {
 
 exports.postSignup = (req, res, next) => {
 
-    const password = req.body.password;
+    const password = bcrypt.hashSync(req.body.password, 8);
     const email = req.body.email;
     const name = req.body.name;
     const mobileno = req.body.mobileno;
