@@ -21,31 +21,34 @@ exports.loginUser = async (req, res, next) => {
 
             }
 
-            loadedUser = user;
-            bcrypt.compare(password, user.password)
+            if(user.isActive == true){
+
+                loadedUser = user;
+                bcrypt.compare(password, user.password)
                 .then(doMatch => {
                     if (!doMatch) {
                         res.status(400).json({ message: 'Password do not match', status: 'error' })
-
+                        
                     }
-
+                    
                     //const online= ()=>{
-                    const token = jwt.sign({
-                        email: loadedUser.email,
-                        userId: loadedUser._id.toString(),
-                    }, "!23ThisisaSecretFor@#$%^%^^&&allthebest", { expiresIn: '3h' })
-
-
-
-                    res.status(200).json({
-                        message: 'Sign In Successfull',
-                        token: token,
-                        userId: loadedUser._id.toString(),
-                        expiresIn: '3h',
-                        //isOnline:User.isOnline
-                    })
-                    // }
-                });
+                        const token = jwt.sign({
+                            email: loadedUser.email,
+                            userId: loadedUser._id.toString(),
+                        }, "!23ThisisaSecretFor@#$%^%^^&&allthebest", { expiresIn: '3h' })
+                        
+                        
+                        
+                        res.status(200).json({
+                            message: 'Sign In Successfull',
+                            token: token,
+                            userId: loadedUser._id.toString(),
+                            expiresIn: '3h',
+                            //isOnline:User.isOnline
+                        })
+                        // }
+                    });
+                }
         }).catch(err => {
             return res.status(500).json({ err: err.message, message: 'Something went wrong!' })
 
