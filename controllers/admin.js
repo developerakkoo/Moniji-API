@@ -45,7 +45,7 @@ const postLogin = (req, res, next) => {
             })
         });
     }).catch(err =>{
-        res.status(400).json({message: error.message, status:'error'});
+        res.status(400).json({message: err.message, status:'error'});
     })
 }
 

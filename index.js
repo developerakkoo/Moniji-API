@@ -10,8 +10,8 @@ const multer = require("multer");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 
-// const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mongodb.net/moniji?retryWrites=true&w=majority";
-const MONGODB_URI ="mongodb://localhost:27017/moniji_App";
+const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mongodb.net/moniji?retryWrites=true&w=majority";
+// const MONGODB_URI ="mongodb://localhost:27017/moniji_App";
 
 //ROUTES
 
