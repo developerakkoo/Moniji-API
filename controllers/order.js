@@ -1,4 +1,5 @@
 const Order = require("./../models/order");
+const Admin = require('../models/admin');
 const aleaRNGFactory = require("number-generator/lib/aleaRNGFactory");
 const { uInt32 } = aleaRNGFactory(2);
 
@@ -77,6 +78,7 @@ exports.getAllOrder = async (req, res, next) =>{
 }
 
 exports.updateOrder = async (req, res, next) =>{
+
     try {
         const id = req.params.id;
         
@@ -97,17 +99,24 @@ exports.updateOrder = async (req, res, next) =>{
 
 exports.deleteOrder = async(req, res, next) =>{
     try{
-        const id = req.params.id;
-
-        const order = await Order.findByIdAndDelete(id);
-
-        if(order){
-            res.status(201).json({
-                message: "Deleted Order"
-            })
+        const savedAdmin =  await Admin.findById({_id:req.params.id});
+        if (!savedAdmin){
+            return  res.status(400).json({message: 'User dose not have admin access!'});
         }
+        const id = req.body.id;
+
+        const order = await Order.findById(id);
+
+        if(!order){
+            return res.status(201).json({message: "order dose not exist"})
+        }
+        await Order.deleteOne({
+            _id : req.params.id
+        });
+        return res.status(201).json({message: "order Deleted !"})
 
     }catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Something went wrong!"
         })

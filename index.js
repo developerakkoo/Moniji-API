@@ -18,6 +18,7 @@ const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mo
 const adminRoute = require("./routes/admin");
 const userRoute = require("./routes/user");
 const orderRoute = require("./routes/order");
+const SubAdminRoute =  require('./routes/SubAdmin.route')
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(cors());
 app.use(adminRoute);
 app.use(userRoute);
 app.use(orderRoute);
+app.use(SubAdminRoute);
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');

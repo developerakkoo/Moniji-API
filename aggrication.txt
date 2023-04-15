@@ -1,0 +1,156 @@
+total active user 
+
+[
+  {
+    '$match': {
+      'isActive': true
+    }
+  }, {
+    '$count': 'Active users'
+  }
+]
+
+
+total blocked user
+
+[
+  {
+    '$match': {
+      'isBlocked': true
+    }
+  }, {
+    '$count': 'Blocked users'
+  }
+]
+
+
+
+total user
+
+
+[
+  {
+    '$count': 'total user users'
+  }
+]
+
+
+monthly active users
+
+[
+  {
+    '$match': {
+      'isActive': true
+    }
+  }, {
+    '$project': {
+      'createdAt': {
+        '$month': '$createdAt'
+      }
+    }
+  }, {
+    '$count': 'Monthly Active user'
+  }
+]
+
+
+
+
+monthly deactive user
+
+[
+  {
+    '$match': {
+      'isActive': false
+    }
+  }, {
+    '$project': {
+      'createdAt': {
+        '$month': '$createdAt'
+      }
+    }
+  }, {
+    '$count': 'Monthly Active user'
+  }
+]
+
+
+
+sort order by order status
+
+[
+    {
+        '$match': {
+            'status': 1   // number change  different status
+        }
+    }
+]
+
+
+order filter by month
+
+[
+  {
+    '$project': {
+      'createdAt': {
+        '$month': '$createdAt'
+      }
+    }
+  }
+]
+
+order filter by year
+
+[
+  {
+    '$project': {
+      'createdAt': {
+        '$year': '$createdAt'
+      }
+    }
+  }
+]
+
+
+
+
+all in one
+
+
+[
+  {
+    '$project': {
+      'year': {
+        '$year': '$createdAt'
+      }, 
+      'month': {
+        '$month': '$createdAt'
+      }, 
+      'day': {
+        '$dayOfMonth': '$createdAt'
+      }, 
+      'hour': {
+        '$hour': '$createdAt'
+      }, 
+      'seconds': {
+        '$second': '$createdAt'
+      }, 
+      'milliseconds': {
+        '$millisecond': '$createdAt'
+      }, 
+      'dayOfYear': {
+        '$dayOfYear': '$createdAt'
+      }, 
+      'dayOfWeek': {
+        '$dayOfWeek': '$createdAt'
+      }, 
+      'week': {
+        '$week': '$createdAt'
+      }
+    }
+  }
+]
+
+
+
+mongodb quay

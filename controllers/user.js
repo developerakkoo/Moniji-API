@@ -74,8 +74,6 @@ exports.postSignup = (req, res, next) => {
         city,
         gst,
         company
-
-       
     })
 
     newuser.save().then((result) => {

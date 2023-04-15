@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const adminSchema = new Schema({
     email:{
         type: String,
-        required: [true, 'Email is required']
+        required: [true, 'Email is required'],
+        unique: true,
     },
 
     password:{
