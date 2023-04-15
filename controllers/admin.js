@@ -56,6 +56,8 @@ const postLogin = (req, res, next) => {
             res.status(200).json({message: 'Sign In Successful',postResponse})
                 IO.getIO.emit('post admin Login',postResponse);
         });
+    }).catch(err =>{
+        res.status(400).json({message: err.message, status:'error'});
     }).catch(error =>{
         res.status(400).json({message: error.message, status:'error'});
     })
@@ -81,8 +83,9 @@ const postSignup = (req, res, next) => {
             })
             return admin.save();
         }).then((result) => {
-            res.status(201).json({message: 'Admin Created Successfully!', status: '201', userId: result._id});
             IO.getIO.emit('post admin Signup',result);
+            return res.status(201).json({message: 'Admin Created Successfully!', status: '201', userId: result._id});
+        
         })
     })
     

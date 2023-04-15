@@ -3,76 +3,73 @@ const IO = require('../socket')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const io = require('../socket');
+require('dotenv').config();
 
 
-exports.loginUser = async (req, res, next) => {
-    const email = req.body.email;
-    const password = req.body.password;
+async function loginUser(req, res, next)  {
+
     let loadedUser;
-    User.findOne({ email: email })
-        .then(user => {
+    const user = await User.findOne({ email: req.body.email })
             if (!user) {
-                res.status(200).json({ message: 'User not found', status: 'error' });
+                return res.status(200).json({ message: 'User not found', status: 'error' });
             }
             if(user.isActive==false){
-                res.status(200).json({ message: 'Not verified', status: 'error' });
+                return res.status(200).json({ message: 'Not verified', status: 'error' });
             }
-            loadedUser = user;
-            bcrypt.compare(password, user.password)
-                .then(doMatch => {
-                    if (!doMatch) {
-                        res.status(400).json({ message: 'Password do not match', status: 'error' })
-                    }
-                    //const online= ()=>{
-                    const token = jwt.sign({
-                        email: loadedUser.email,
-                        userId: loadedUser._id.toString(),
-                    }, "!23ThisisaSecretFor@#$%^%^^&&allthebest",{ expiresIn: '3h' })
-                    const postResponse={
-                        token: token,
-                        userId: loadedUser._id.toString(),
-                        expiresIn: '3h'
-                    }
+            let passwordIValid = bcrypt.compareSync(
+                req.body.password,
+                user.password
+            );
+            if(!passwordIValid){
+                return res.status(401).send({message:"Invalid Password or user name !"})
+            }
+            let token = jwt.sign({ userName: user.name }, process.env.SECRET_KEY, {
+                expiresIn: 86400 // 24 hours
+            });
+            const postResponse={
+                name :user.name,
+                email:user.email,
+                Id:user._id,
+                isActive:user.isActive,
+                token:token
+            }
+        
                     res.status(200).json({message: 'Sign In Successful',postResponse})
                     IO.getIO.emit('loginUser',postResponse);
-                });
-        }).catch(err => {
-            return res.status(500).json({ err: err.message, message: 'Something went wrong!' })
-            
-        })
+                
 }
 
-exports.postSignup = (req, res, next) => {
+async function postSignup (req, res, next) {
+    const userObj={
+        password : bcrypt.hashSync(req.body.password, 8),
+        email : req.body.email,
+        name : req.body.name,
+        mobileno : req.body.mobileno,
+        address : req.body.address,
+        city : req.body.city,
+        gst : req.body.gst,
+        company : req.body.company
+    }
+    try{
+        const SavedUser = await User.findOne({email:req.body.email})
+        if (SavedUser){
+        return res.status(400).json({message: 'User with email Already Exists'});
+        }
+        const userCreated = await User.create(userObj);
+        const postResponse = {
+            name: userCreated.name,
+            userId: userCreated._id,
+            email: userCreated.email,
+            isActive: userCreated.isActive
+        }
+        res.status(201).send({message:`User created successfully `,postResponse})
+    }    catch(error){
+        res.status(500).send({message:`Error while creating User ${error.message}`})
+    }
 
-    const password = bcrypt.hashSync(req.body.password, 8);
-    const email = req.body.email;
-    const name = req.body.name;
-    const mobileno = req.body.mobileno;
-    const address = req.body.address;
-    const city = req.body.city;
-    const gst = req.body.gst;
-    const company = req.body.company;
-    
-    const newuser = new User({
-        email,
-        name,
-        password,
-        mobileno,
-        address,
-        city,
-        gst,
-        company
-    })
-    newuser.save().then((result) => {
-        res.status(201).json({ message: 'User Created Successfully!', status: '201', userId: result._id, });
-        IO.getIO.emit('postSignup',result);
-    })
-        .catch(err => {
-            res.status(500).json({ error: err.message, message: 'Something went wrong!' })
-        })
 }
 
-exports.getAllUser = async (req, res, next) =>{
+async function getAllUser (req, res, next){
     try {
             const user = await User.find({});
             if(user){
@@ -83,11 +80,11 @@ exports.getAllUser = async (req, res, next) =>{
             }
             IO.getIO.emit('getAllUser',user);
     } catch (error) {
-        res.status(500).json({ error: err.message, message: 'Something went wrong!' })
+        res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
 }
 
-exports.getUserById = async (req, res, next) =>{
+async function getUserById  (req, res, next){
     try {
             let id = req.params.id;
             const user = await User.findById(id);
@@ -99,6 +96,14 @@ exports.getUserById = async (req, res, next) =>{
             }
             IO.getIO.emit('getUserById',user);
     } catch (error) {
-        res.status(500).json({ error: err.message, message: 'Something went wrong!' })
+        res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
+}
+
+
+module.exports={
+    loginUser,
+    postSignup,
+    getAllUser,
+    getUserById
 }
