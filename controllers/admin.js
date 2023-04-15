@@ -4,6 +4,7 @@ const User= require('../models/user')
 const Order = require("./../models/order");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const IO =  require('../socket')
 const path = require('path');
 const csvWriter =  require('csv-writer');
 const writer = csvWriter.createObjectCsvWriter(
@@ -25,16 +26,10 @@ const writer2 = csvWriter.createObjectCsvWriter(
         { id: 'createdAt', title: 'Week'}
     ]});
 
-
-
-
 const postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-
     let loadedUser;
-
-
     Admin.findOne({ email: email})
     .then(admin => {
         if(!admin){
@@ -42,27 +37,24 @@ const postLogin = (req, res, next) => {
             error.status = 404;
             next(error);
         }
-
         loadedUser = admin;
-
         bcrypt.compare(password, admin.password)
         .then(doMatch => {
             if(!doMatch){
-               const error = new Error('Password do not match');
-               error.status = 401;
-               next(error);
+                const error = new Error('Password do not match');
+                error.status = 401;
+                next(error);
             }
-
             const token = jwt.sign({
                 email: loadedUser.email,
                 userId: loadedUser._id,
-            },"!23ThisisaSecretFor@#$%^%^^&&allthebest", {expiresIn: '3h'})
-
-            res.status(200).json({
-                message: 'Sign In Successfull',
+            },"!23ThisisaSecretFor@#$%^%^^&&allthebest", {expiresIn: '3h'});
+            const  postResponse={   
                 token: token,
                 userId: loadedUser._id.toString()
-            })
+            }
+            res.status(200).json({message: 'Sign In Successful',postResponse})
+                IO.getIO.emit('post admin Login',postResponse);
         });
     }).catch(error =>{
         res.status(400).json({message: error.message, status:'error'});
@@ -73,37 +65,31 @@ const postLogin = (req, res, next) => {
 const postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-
     Admin.findOne({ email: email})
     .then(admin => {
         if(admin){
-           res.status(400).json({
-               status: false,
-               message: 'User with email Already Exists'
-           })
+            res.status(400).json({
+            status: false,
+            message: 'User with email Already Exists'
+        })
         }
-
         bcrypt.hash(password, 12)
         .then((hashedPasswords) => {
             const admin = new Admin({
                 email: email,
                 password: hashedPasswords
             })
-    
             return admin.save();
         }).then((result) => {
             res.status(201).json({message: 'Admin Created Successfully!', status: '201', userId: result._id});
+            IO.getIO.emit('post admin Signup',result);
         })
     })
     
-   .catch(error =>{
+.catch(error =>{
     res.status(400).json({message: error.message, status:'error'});
     })
-
-   
-
 }
-
 
 async function acceptUserReq(req, res, next){
     const savedAdmin =  await Admin.findById({_id:req.params.id});
@@ -122,6 +108,7 @@ async function acceptUserReq(req, res, next){
         isActive:saveUser.isActive
     }
     res.status(200).json({message: 'User updated Successfully!',postResponse});
+    IO.getIO.emit('admin accept User Req',postResponse);
 }
 
 async function UpdateOrderReq(req, res, next){
@@ -138,9 +125,9 @@ async function UpdateOrderReq(req, res, next){
     const updateOrder = await savedOrder.save();
 const  postResponse={
     isAccepted:updateOrder.isAccepted
-
 }
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    IO.getIO.emit('admin Update Order Req',postResponse);
 }
 
 async function UpdateOrderStatus(req, res, next){
@@ -164,7 +151,8 @@ const  postResponse={
     isAccepted:updateOrder.isAccepted
 
 }
-    return res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    IO.getIO.emit('admin Update Order Status',postResponse);
 }
 
 async function GrantSubAdmin(req, res, next){
@@ -181,8 +169,6 @@ async function GrantSubAdmin(req, res, next){
     savedUser.canUpdateOrder= req.body.canUpdateOrder
     savedUser.canAcceptUser = req.body.canAcceptUser
     savedUser.canDeleteOrder = req.body.canDeleteOrder
-
-
     const UpdatedSubAdmin = await savedUser.save();
     const postResponse={
         userId:UpdatedSubAdmin._id,
@@ -194,6 +180,7 @@ async function GrantSubAdmin(req, res, next){
         
     }
     res.status(200).json({message: 'User updated Successfully!',postResponse});
+    IO.getIO.emit('admin Grant Sub Admin',postResponse);
 }
 
 async function totalActiveUser(req, res, next){
@@ -212,6 +199,7 @@ async function totalActiveUser(req, res, next){
     ]
     const user = await User.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',user});
+    IO.getIO.emit('total Active User',user);
 }
 async function totalNotActiveUser(req, res, next){
     const savedAdmin =  await Admin.findById({_id:req.params.id});
@@ -229,6 +217,7 @@ async function totalNotActiveUser(req, res, next){
     ]
     const user = await User.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',user});
+    IO.getIO.emit('Not Active User',user);
 }
 
 async function totalBlockedUser(req, res, next){
@@ -248,6 +237,7 @@ async function totalBlockedUser(req, res, next){
     ]
     const user = await User.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',user});
+    IO.getIO.emit('total Blocked User',user);
 }
 
 async function totalUser(req, res, next){
@@ -263,6 +253,7 @@ async function totalUser(req, res, next){
     ]
     const user = await User.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',user});
+    IO.getIO.emit('Total User',user);
 }
 
 async function MonthlyActiveUser(req, res, next){
@@ -286,6 +277,7 @@ async function MonthlyActiveUser(req, res, next){
     ]
     const user = await User.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',user});
+    IO.getIO.emit('active  User Req',user);
 }
 
 async function sortOrderByStatus(req, res, next){
@@ -303,6 +295,7 @@ async function sortOrderByStatus(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',order});
+    IO.getIO.emit('sort Order By Status',order);
 }
 
 async function OrderByMonth(req, res, next){
@@ -322,6 +315,7 @@ async function OrderByMonth(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',order});
+    IO.getIO.emit('OrderByMonth',postResponse);
     writer1.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
@@ -350,6 +344,7 @@ async function OrderByYear(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',order});
+    IO.getIO.emit('OrderByYear',postResponse);
     writer2.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
@@ -374,18 +369,14 @@ async function OrderByWeek(req, res, next){
         }
     ]
     const order = await Order.aggregate(pipeline);
-
     res.status(200).json(order);
-
+    IO.getIO.emit('OrderByWeek',postResponse);
     writer.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
 })
-    //return res.status(200).send(order);
-
-    
 }
 
 

@@ -4,8 +4,6 @@ const aleaRNGFactory = require("number-generator/lib/aleaRNGFactory");
 const { uInt32 } = aleaRNGFactory(2);
 
 exports.postOrder = async(req, res, next) =>{
-    console.log(">>>>>>>>>>>")
-
     try {
         const orderObj={
             diameter:req.body.diameter,
@@ -15,22 +13,15 @@ exports.postOrder = async(req, res, next) =>{
             orderId:uInt32(),
             type:req.body.type,
             userId:req.body.userId
-    
         }
         const order = await new Order(orderObj);
         await order.save().then((result) => {
-
             res.status(201).json({ message: 'order Created Successfully!', status: '201', orderId: result.orderId, });
+            IO.getIO.emit('postOrder',order);
         })
         .catch(err => {
             res.status(500).json({ error: err.message, message: 'Something went wrong!' })
         })
-        // if(order){
-        //     res.status(200).json({
-        //         message:"Order Created!",
-        //         order
-        //     })
-        // }
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -41,9 +32,7 @@ exports.postOrder = async(req, res, next) =>{
 exports.getOrderByUserId = async(req, res, next) =>{
     try{
         const userid = req.params.userid;
-
         const order = await Order.find({userId: userid});
-
         if(order){
             res.status(200).json({
                 order,
@@ -51,6 +40,7 @@ exports.getOrderByUserId = async(req, res, next) =>{
                 length: order.length
             })
         }
+        IO.getIO.emit('getOrderByUserId',order);
     }catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -62,7 +52,6 @@ exports.getAllOrder = async (req, res, next) =>{
     try {
         
         const order = await Order.find({});
-
         if(order){
             res.status(200).json({
                 order,
@@ -70,6 +59,7 @@ exports.getAllOrder = async (req, res, next) =>{
                 message: "All Orders"
             })
         }
+        IO.getIO.emit('getAllOrder',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -81,15 +71,14 @@ exports.updateOrder = async (req, res, next) =>{
 
     try {
         const id = req.params.id;
-        
         const order = await Order.findByIdAndUpdate(id, req.body);
-
         if(order){
             res.status(201).json({
                 order,
                 message: "Updated Order"
             })
         }
+        IO.getIO.emit('updateOrder',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -104,17 +93,15 @@ exports.deleteOrder = async(req, res, next) =>{
             return  res.status(400).json({message: 'User dose not have admin access!'});
         }
         const id = req.body.id;
-
         const order = await Order.findById(id);
-
         if(!order){
             return res.status(201).json({message: "order dose not exist"})
         }
-        await Order.deleteOne({
+        const deletedOrder = await Order.deleteOne({
             _id : req.params.id
         });
+        IO.getIO.emit('deletedOrder',deletedOrder);
         return res.status(201).json({message: "order Deleted !"})
-
     }catch (error) {
         console.log(error)
         res.status(500).json({

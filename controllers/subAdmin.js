@@ -4,46 +4,39 @@ const User= require('../models/user')
 const Order = require("./../models/order");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
+const IO = require('../socket') 
 
 
 
 async function postLogin (req, res, next) {
-
     try{
     const SavedUser = await SubAdmin.findOne({email:req.body.email});
-
         if(!SavedUser){
         return res.status(400).send({message:`User not found ${req.body.email}`})
         }
         if(SavedUser.isActive == false){
             return res.status(400).send({message:`User dose not have access to Login ! ${req.body.email}`})
             }
-
         let passwordIsValid = bcrypt.compareSync(req.body.password, SavedUser.password)
         if (!passwordIsValid) {
             return res.status(401).send({
                 message: "Invalid Password or user name !"
             });
         }
-    
-
         let token = jwt.sign({ userId: SavedUser._id ,email:SavedUser.email}, "!23ThisisaSecretFor@#$%^%^^&&allthebest", {
             expiresIn: '3h' // 3 hours
         })
-        res.status(200).json({
-            message: 'Sign In Successfull',
+        const postResponse={
             token: token,
             userId: SavedUser._id
-        })
+        }
+        res.status(200).json({message: 'Sign In Successful',postResponse});
+        IO.getIO.emit('postLogin',postResponse);
     }catch(error){
         res.status(400).json({
             message: `something went wrong ${error.message}`,
         })
     }
-
-
-
 }
 
 async function postSignup  (req, res, next) {
@@ -57,9 +50,9 @@ async function postSignup  (req, res, next) {
     if (SavedUser){
     return res.status(400).json({message: 'User with email Already Exists'});
     }
-    
             const result = await SubAdmin.create(SubAdminObj);
             res.status(201).json({message: 'Sub Admin Created Successfully!', userId: result._id});
+            IO.getIO.emit('Sub admin signup',result);
         }
         catch(error){
             res.status(400).send({message: error.message});
@@ -84,13 +77,13 @@ async function subAcceptUserReq(req, res, next){
         return  res.status(400).json({message: 'you dont have admin permission   to accept user !'});
     }
     savedUser.isActive = req.body.isActive 
-
     const saveUser = await savedUser.save();
     const postResponse={
         userId:saveUser._id,
         isActive:saveUser.isActive
     }
     res.status(200).json({message: 'User updated Successfully!',postResponse});
+    IO.getIO.emit('sub admin accept user req',postResponse);
 }
 
 async function subUpdateOrderReq(req, res, next){
@@ -109,13 +102,12 @@ async function subUpdateOrderReq(req, res, next){
         return  res.status(400).json({message: 'you dont have admin permission   to accept Order !'});
     }
     savedOrder.isAccepted = req.body.isAccepted 
-    
     const updateOrder = await savedOrder.save();
-const  postResponse={
+    const  postResponse={
     isAccepted:updateOrder.isAccepted
-
 }
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    IO.getIO.emit('sub admin accept order req',postResponse);
 }
 
 async function subUpdateOrderStatus(req, res, next){
@@ -129,7 +121,6 @@ async function subUpdateOrderStatus(req, res, next){
     if (!savedSubAdmin.canUpdateOrder){
         return  res.status(400).json({message: 'you dont have admin permission   to Update Order !'});
     }
-    
     const savedOrder = await Order.findOne({_id:req.body.id});
     if(!savedOrder){
         return res.status(400).json({message: 'Order dose not exist !'});
@@ -144,9 +135,9 @@ const  postResponse={
     status:updateOrder.status,
     message:updateOrder.message,
     isAccepted:updateOrder.isAccepted
-
 }
-    return res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    res.status(200).json({message: 'Order updated Successfully!',postResponse});
+    IO.getIO.emit('sub Update Order Status',postResponse);
 }
 
 
@@ -160,17 +151,15 @@ async function SubAdminDeleteOrder (req, res, next){
             return  res.status(400).json({message: 'User dose not have  admin permission!'});
         }
         const id = req.body.id;
-
         const order = await Order.findById(id);
-
         if(!order){
             return res.status(201).json({message: "order dose not exist"})
         }
         await Order.deleteOne({
             _id : req.params.id
         });
-        return res.status(201).json({message: "order Deleted !"})
-
+        res.status(201).json({message: "order Deleted !"})
+        IO.getIO.emit('Sub Admin Delete Order',req.params.id);
     }catch (error) {
         console.log(error)
         res.status(500).json({
