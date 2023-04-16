@@ -71,7 +71,7 @@ async function postSignup (req, res, next) {
 
 async function getAllUser (req, res, next){
     try {
-            const user = await User.find({});
+            const user = await User.find({isActive: false});
             if(user){
                 res.status(200).json({
                     user,
