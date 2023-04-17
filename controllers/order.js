@@ -51,7 +51,7 @@ exports.getOrderByUserId = async(req, res, next) =>{
 exports.getAllOrder = async (req, res, next) =>{
     try {
         
-        const order = await Order.find({});
+        const order = await Order.find({}).populate("userId");
         if(order){
             res.status(200).json({
                 order,
