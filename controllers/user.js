@@ -8,61 +8,78 @@ require('dotenv').config();
 
 async function loginUser(req, res, next)  {
 
+    const email = req.body.email;
+    const password = req.body.password;
+
     let loadedUser;
-    const user = await User.findOne({ email: req.body.email })
+
+    User.findOne({ email: email })
+        .then(user => {
             if (!user) {
-                return res.status(200).json({ message: 'User not found', status: 'error' });
+                res.status(400).json({ message: 'User not found', status: 'error' })
             }
-            if(user.isActive==false){
-                return res.status(200).json({ message: 'Not verified', status: 'error' });
-            }
-            let passwordIValid = bcrypt.compareSync(
-                req.body.password,
-                user.password
-            );
-            if(!passwordIValid){
-                return res.status(401).send({message:"Invalid Password or user name !"})
-            }
-            let token = jwt.sign({ userName: user.name }, process.env.SECRET_KEY, {
-                expiresIn: 86400 // 24 hours
-            });
-            const postResponse={
-                name :user.name,
-                email:user.email,
-                Id:user._id,
-                isActive:user.isActive,
-                token:token
-            }
-        
-                    res.status(200).json({message: 'Sign In Successful',postResponse})
-                    IO.getIO.emit('loginUser',postResponse);
+
+            loadedUser = user;
+
+            bcrypt.compare(password, user.password)
+                .then(doMatch => {
+                    if (!doMatch) {
+                        res.status(400).json({ message: 'Password do not match', status: 'error' })
+
+                    }
+
+                    //const online= ()=>{
+                    const token = jwt.sign({
+                        email: loadedUser.email,
+                        userId: loadedUser._id.toString(),
+                    }, "!23ThisisaSecretFor@#$%^%^^&&allthebest", { expiresIn: '3h' })
+
+
+
+                    res.status(200).json({
+                        message: 'Sign In Successfull',
+                        token: token,
+                        userId: loadedUser._id.toString(),
+                        expiresIn: '3h',
+                        //isOnline:User.isOnline
+                    })
+                    // }
+                });
+        }).catch(err => {
+            return res.status(500).json({ err: err.message, message: 'Something went wrong!' })
+
+        })
                 
 }
 
 async function postSignup (req, res, next) {
-    const userObj={
-        password : bcrypt.hashSync(req.body.password, 8),
-        email : req.body.email,
-        name : req.body.name,
-        mobileno : req.body.mobileno,
-        address : req.body.address,
-        city : req.body.city,
-        gst : req.body.gst,
-        company : req.body.company
-    }
+    
     try{
+        
         const SavedUser = await User.findOne({email:req.body.email})
         if (SavedUser){
         return res.status(400).json({message: 'User with email Already Exists'});
         }
-        const userCreated = await User.create(userObj);
-        const postResponse = {
-            name: userCreated.name,
-            userId: userCreated._id,
-            email: userCreated.email,
-            isActive: userCreated.isActive
-        }
-        res.status(201).send({message:`User created successfully `,postResponse})
+
+        bcrypt.hash(req.body.password, 12)
+        .then((hashedPassword) =>{
+            const user = new User({
+                password : hashedPassword,
+            email : req.body.email,
+            name : req.body.name,
+            mobileno : req.body.mobileno,
+            address : req.body.address,
+            city : req.body.city,
+            gst : req.body.gst,
+            company : req.body.company
+            })
+
+            return user.save();
+        }).then((user) =>{
+            
+            res.status(201).send({message:`User registered successfully `,user})
+        })
+        
     }    catch(error){
         res.status(500).send({message:`Error while creating User ${error.message}`})
     }
