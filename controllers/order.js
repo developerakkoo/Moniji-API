@@ -59,7 +59,7 @@ exports.getAllOrder = async (req, res, next) =>{
                 message: "All Orders"
             })
         }
-        IO.getIO.emit('getAllOrder',order);
+        IO.getIO().emit('get:order',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -78,7 +78,7 @@ exports.updateOrder = async (req, res, next) =>{
                 message: "Updated Order"
             })
         }
-        IO.getIO.emit('updateOrder',order);
+        IO.getIO().emit('get:order',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -100,7 +100,7 @@ exports.deleteOrder = async(req, res, next) =>{
         const deletedOrder = await Order.deleteOne({
             _id : req.params.id
         });
-        IO.getIO.emit('deletedOrder',deletedOrder);
+        IO.getIO().emit('get:Order',deletedOrder);
         return res.status(201).json({message: "order Deleted !"})
     }catch (error) {
         console.log(error)
