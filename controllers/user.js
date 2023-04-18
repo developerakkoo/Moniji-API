@@ -79,6 +79,8 @@ async function postSignup (req, res, next) {
             
             res.status(201).send({message:`User registered successfully `,user})
         })
+
+        io.getIO().emit("get:user", SavedUser);
         
     }    catch(error){
         res.status(500).send({message:`Error while creating User ${error.message}`})

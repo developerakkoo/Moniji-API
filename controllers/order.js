@@ -17,7 +17,7 @@ exports.postOrder = async(req, res, next) =>{
         const order = await new Order(orderObj);
         await order.save().then((result) => {
             res.status(201).json({ message: 'order Created Successfully!', status: '201', orderId: result.orderId, });
-            IO.getIO.emit('postOrder',order);
+            IO.getIO().emit('get:order',order);
         })
         .catch(err => {
             res.status(500).json({ error: err.message, message: 'Something went wrong!' })
@@ -40,7 +40,7 @@ exports.getOrderByUserId = async(req, res, next) =>{
                 length: order.length
             })
         }
-        IO.getIO.emit('getOrderByUserId',order);
+        IO.getIO().emit('get:order',order);
     }catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
