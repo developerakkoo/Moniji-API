@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const SubAdminController = require('../controllers/subAdmin');
 
+router.get('/subadmin', SubAdminController.getAllSubAdmin);
+
 router.post('/SubAdmin/login',SubAdminController.postLogin);
 
 router.post('/SubAdmin/signup',SubAdminController.postSignup);

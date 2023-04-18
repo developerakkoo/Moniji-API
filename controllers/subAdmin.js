@@ -168,14 +168,33 @@ async function SubAdminDeleteOrder (req, res, next){
 }
 }
 
+async function getAllSubAdmin (req, res, next){
+    try{
+        const sub =  await SubAdmin.find({});
+        
+        if(sub){
+            res.status(200).json({sub})
+        }
+        res.status(201).json({message: "order Deleted !"})
+        IO.getIO().emit('get:subadmin',sub);
+    }catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Something went wrong!"
+        })
+}
+}
+
 
 module.exports ={
+    getAllSubAdmin,
     postLogin,
     postSignup,
     subAcceptUserReq,
     subUpdateOrderReq,
     subUpdateOrderStatus,
-    SubAdminDeleteOrder
+    SubAdminDeleteOrder,
+
 }
 
 
