@@ -2,7 +2,7 @@ const Order = require("./../models/order");
 const Admin = require('../models/admin');
 const aleaRNGFactory = require("number-generator/lib/aleaRNGFactory");
 const { uInt32 } = aleaRNGFactory(2);
-
+const IO = require("../socket");
 exports.postOrder = async(req, res, next) =>{
     try {
         const orderObj={
@@ -34,13 +34,13 @@ exports.getOrderByUserId = async(req, res, next) =>{
         const userid = req.params.userid;
         const order = await Order.find({userId: userid});
         if(order){
+            IO.getIO().emit('get:order',order);
             res.status(200).json({
                 order,
                 message: "User Orders",
                 length: order.length
             })
         }
-        IO.getIO().emit('get:order',order);
     }catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -53,13 +53,13 @@ exports.getAllOrder = async (req, res, next) =>{
         
         const order = await Order.find({}).populate("userId");
         if(order){
+            IO.getIO().emit('get:order',order);
             res.status(200).json({
                 order,
                 length: order.length,
                 message: "All Orders"
             })
         }
-        IO.getIO().emit('get:order',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -73,12 +73,12 @@ exports.updateOrder = async (req, res, next) =>{
         const id = req.params.id;
         const order = await Order.findByIdAndUpdate(id, req.body);
         if(order){
+            IO.getIO().emit('get:order',order);
             res.status(201).json({
                 order,
                 message: "Updated Order"
             })
         }
-        IO.getIO().emit('get:order',order);
     } catch (error) {
         res.status(500).json({
             message: "Something went wrong!"
@@ -100,8 +100,8 @@ exports.deleteOrder = async(req, res, next) =>{
         const deletedOrder = await Order.deleteOne({
             _id : req.params.id
         });
-        IO.getIO().emit('get:Order',deletedOrder);
-        return res.status(201).json({message: "order Deleted !"})
+        IO.getIO().emit('get:order',deletedOrder);
+        res.status(201).json({message: "order Deleted !"})
     }catch (error) {
         console.log(error)
         res.status(500).json({
