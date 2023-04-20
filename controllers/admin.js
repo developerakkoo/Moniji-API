@@ -2,25 +2,27 @@ const Admin = require('../models/admin');
 const SubAdmin= require('../models/SubAdmin.model');
 const User= require('../models/user')
 const Order = require("./../models/order");
+const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const IO =  require('../socket')
 const path = require('path');
 const csvWriter =  require('csv-writer');
+require('dotenv').config();
 const writer = csvWriter.createObjectCsvWriter(
-    {path:path.resolve(__dirname,'weeklyOrder.csv'),
+    {path:path.resolve(__dirname,'public/weeklyOrder.csv'),
     header:[
     { id: '_id', title: 'ID' },
     { id: 'createdAt', title: 'Week'}
 ]});
 const writer1 = csvWriter.createObjectCsvWriter(
-    {path:path.resolve(__dirname,'MonthlyOrder.csv'),
+    {path:path.resolve(__dirname,'public/MonthlyOrder.csv'),
     header:[ 
     { id: '_id', title: 'ID' },
     { id: 'createdAt', title: 'Week'}
 ]});
 const writer2 = csvWriter.createObjectCsvWriter(
-    {path:path.resolve(__dirname,'YearlyOrder.csv'),
+    {path:path.resolve(__dirname,'public/YearlyOrder.csv'),
     header:[
         { id: '_id', title: 'ID' },
         { id: 'createdAt', title: 'Week'}
@@ -57,8 +59,10 @@ const postLogin = (req, res, next) => {
                 IO.getIO.emit('post admin Login',postResponse);
         });
     }).catch(err =>{
+        console.log(err)
         res.status(400).json({message: err.message, status:'error'});
     }).catch(error =>{
+        console.log(error)
         res.status(400).json({message: error.message, status:'error'});
     })
 }
@@ -83,7 +87,7 @@ const postSignup = (req, res, next) => {
             })
             return admin.save();
         }).then((result) => {
-            IO.getIO.emit('post admin Signup',result);
+            //IO.getIO.emit('post admin Signup',result);
             return res.status(201).json({message: 'Admin Created Successfully!', status: '201', userId: result._id});
         
         })
@@ -318,7 +322,7 @@ async function OrderByMonth(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',order});
-    IO.getIO.emit('OrderByMonth',postResponse);
+    //IO.getIO.emit('OrderByMonth',postResponse);
     writer1.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
@@ -347,7 +351,7 @@ async function OrderByYear(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     res.status(200).json({message: 'User fetched Successfully!',order});
-    IO.getIO.emit('OrderByYear',postResponse);
+    //IO.getIO.emit('OrderByYear',postResponse);
     writer2.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
@@ -357,7 +361,9 @@ async function OrderByYear(req, res, next){
 }
 
 async function OrderByWeek(req, res, next){
+    console.log(req.params.id)
     const savedAdmin =  await Admin.findById({_id:req.params.id});
+    console.log(">>>>",savedAdmin)
     if (!savedAdmin){
         return  res.status(400).json({message: 'User dose not have admin access!'});
     }
@@ -373,13 +379,99 @@ async function OrderByWeek(req, res, next){
     ]
     const order = await Order.aggregate(pipeline);
     res.status(200).json(order);
-    IO.getIO.emit('OrderByWeek',postResponse);
+    //IO.getIO.emit('OrderByWeek',postResponse);
     writer.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
 })
+}
+
+
+
+
+//transporter contain our mail sender and password
+let msg = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASS_KEY
+    }
+});
+//sending mail about rest password with rest password page link
+async function forgotPassword(req,res){
+    const {email}= req.body;
+    const User = await Admin.findOne({ email: req.body.email });
+    if(!User){
+        res.send('User not registered');
+        return;
+    }
+    
+    const payload = {
+        userId: User._id,
+        email:User.email 
+    }
+    let token = jwt.sign(payload, process.env.SECRET_KEY + User.password, { expiresIn: 86400 });// 24 hours
+    const Link = `http://localhost:8080/rest-password/${User._id}/${token}`
+    console.log(Link)
+
+
+    let mailOptions = {
+        from: 'serviceacount.premieleague@gmail.com',
+        to: User.email,
+        subject:'Rest password' ,
+        text:`Click on link to reset your password    ${Link}`
+    };
+    msg.sendMail(mailOptions, function(error, info){
+        if (error) {
+        console.log(error);
+        } else {
+        console.log('Email sent: ' + info.response);
+        }
+    });
+    res.send('Password reset link has been sent to your email..!')
+    
+    }
+
+
+//user rest password page for getting the new password from user
+
+async function getResetPassword(req,res){
+    const{id,token} =  req.params;
+    const user = await Admin.findOne({ _id: req.params.id })
+    if(!user){
+        res.send('Invalid Id...!');
+    }
+    try{
+        const payload =jwt.verify(token,process.env.SECRET_KEY + user.password);
+        res.render('reset-password',{email:user.email});
+
+    }catch(error){
+        console.log(error.message);
+        res.send(error.message);
+    }
+}
+
+//updating user password
+
+async function ResetPassword(req,res){
+    const{id,token} =  req.params;
+    const user = await Admin.findOne({ _id: req.params.id });
+    if(!user){
+        res.send('Invalid Id...!');
+    }
+    try{
+        const payload = jwt.verify(token,process.env.SECRET_KEY + user.password);
+        
+            user.password= bcrypt.hashSync(req.body.password, 16) ? bcrypt.hashSync(req.body.password, 16) : user.password
+        const updatedUser= await user.save(user);
+        res.status(200).send(updatedUser);
+
+    }catch(error){
+        console.log(error.message);
+        res.send(error.message);
+    }
 }
 
 
@@ -398,5 +490,8 @@ module.exports={
     sortOrderByStatus,
     OrderByMonth,
     OrderByYear,
-    OrderByWeek
+    OrderByWeek,
+    forgotPassword,
+    getResetPassword,
+    ResetPassword
 }

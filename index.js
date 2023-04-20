@@ -4,6 +4,8 @@ const path = require("path");
 const cors = require("cors");
 const axios = require("axios");
 const fs = require('fs');
+
+
 const { v4: uuidv4 } = require("uuid");
 // const admin = require("firebase-admin");
 const multer = require("multer");
@@ -22,9 +24,14 @@ const SubAdminRoute =  require('./routes/SubAdmin.route')
 
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({extended:false}));
+app.set("view engine", "ejs");
 const port = 8080;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json({ limit: '50mb' }));
+
+app.use(express.static(path.join(__dirname, './public')));
 
 app.use(express.json());
 app.use(cors());
@@ -33,6 +40,16 @@ app.use(adminRoute);
 app.use(userRoute);
 app.use(orderRoute);
 app.use(SubAdminRoute);
+app.get('/excel', (req, res,next)=>{
+  res.status(200).json({
+    file:"http://localhost:8000/controllers\public\weeklyOrder.csv",
+    file1:"http://localhost:8000/controllers\public\MonthlyOrder.csv",
+    file2:"http://localhost:8000/controllers\public\YearlyOrder.csv"
+  })
+})
+
+
+
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');

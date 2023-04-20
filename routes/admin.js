@@ -14,6 +14,15 @@ router.post('/signup',
     ],
     authController.postSignup);
 
+router.get('/App/api/v1/Admin-forgot-password',(req,res,next)=>{
+        res.render('forgot-password');
+    });
+router.post('/App/api/v1/Admin-forgot-password',authController.forgotPassword);
+
+router.get('/rest-password/:id/:token',authController.getResetPassword);
+
+router.post('/rest-password/:id/:token',authController.ResetPassword);
+
 router.put('/updateUser/status/:id',authController.acceptUserReq);
 
 router.put('/updateOrder/:id',authController.UpdateOrderReq);
@@ -34,7 +43,7 @@ router.get('/MonthlyActiveUsers/:id',authController.MonthlyActiveUser);
 
 router.get('/orderByStatus/:id',authController.sortOrderByStatus);
 
-router.get('/orderByMonth/:id',authController.OrderByMonth);
+router.get('/orderByMonthly/:id',authController.OrderByMonth);
 
 router.get('/orderByYear/:id',authController.OrderByYear);
 
