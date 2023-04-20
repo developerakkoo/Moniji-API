@@ -45,6 +45,10 @@ const orderSchema = new Schema({
         default:false
     },
 
+    isAlternate:{
+        type: Boolean
+    },
+
     userId:{
         type: Schema.Types.ObjectId,
         ref: "User"

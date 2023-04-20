@@ -127,16 +127,15 @@ async function UpdateOrderReq(req, res, next){
     if(!savedOrder){
         return res.status(400).json({message: 'Order dose not exist !'});
     }
-    savedOrder.isAccepted = req.body.isAccepted 
+    savedOrder.isAccepted = req.body.isAccepted;
     
     const updateOrder = await savedOrder.save();
 const  postResponse={
     isAccepted:updateOrder.isAccepted
 }
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
-    IO.getIO.emit('admin Update Order Req',postResponse);
+    IO.getIO().emit('get:order',postResponse);
 }
-
 async function UpdateOrderStatus(req, res, next){
     const savedAdmin =  await Admin.findOne({_id:req.params.id});
     if (!savedAdmin){
@@ -144,22 +143,15 @@ async function UpdateOrderStatus(req, res, next){
     }
     const savedOrder = await Order.findOne({_id:req.body.id});
     if(!savedOrder){
-        return res.status(400).json({message: 'Order dose not exist !'});
+        return res.status(400).json({message: 'Order dose not exist!'});
     }
     savedOrder.status = req.body.status 
     savedOrder.message = req.body.message 
-    if(req.body.status==3){
-        savedOrder.isAccepted = false
-    }
+  
     const updateOrder = await savedOrder.save();
-const  postResponse={
-    status:updateOrder.status,
-    message:updateOrder.message,
-    isAccepted:updateOrder.isAccepted
 
-}
-    res.status(200).json({message: 'Order updated Successfully!',postResponse});
-    IO.getIO.emit('admin Update Order Status',postResponse);
+    res.status(200).json({message: 'Order updated Successfully!',updateOrder});
+    IO.getIO().emit('get:order',updateOrder);
 }
 
 async function GrantSubAdmin(req, res, next){

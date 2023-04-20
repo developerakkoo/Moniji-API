@@ -79,6 +79,8 @@ async function postSignup (req, res, next) {
             
             res.status(201).send({message:`User registered successfully `,user})
         })
+
+        io.getIO().emit("get:user", SavedUser);
         
     }    catch(error){
         res.status(500).send({message:`Error while creating User ${error.message}`})
@@ -95,7 +97,7 @@ async function getAllUser (req, res, next){
                     message: "All user Found!"
                 })
             }
-            IO.getIO.emit('getAllUser',user);
+            IO.getIO().emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
@@ -111,16 +113,32 @@ async function getUserById  (req, res, next){
                     message: "user Found!"
                 })
             }
-            IO.getIO.emit('getUserById',user);
+            IO.getIO().emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
 }
 
+async function updateUserById  (req, res, next){
+    try {
+            let id = req.params.id;
+            const user = await User.findByIdAndUpdate(id, req.body);
+            if(user){
+                res.status(200).json({
+                    user,
+                    message: "user Updated!"
+                })
+            }
+            IO.getIO().emit('get:user',user);
+    } catch (error) {
+        res.status(500).json({ error: error.message, message: 'Something went wrong!' })
+    }
+}
 
 module.exports={
     loginUser,
     postSignup,
     getAllUser,
-    getUserById
+    getUserById,
+    updateUserById
 }
