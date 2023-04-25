@@ -1,8 +1,10 @@
 const User = require("./../models/user");
+const nodemailer = require('nodemailer');
 const IO = require('../socket')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const io = require('../socket');
+const path = require('path');
 require('dotenv').config();
 
 
@@ -135,10 +137,96 @@ async function updateUserById  (req, res, next){
     }
 }
 
+
+//transporter contain our mail sender and password
+let msg = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASS_KEY
+    }
+});
+//sending mail about rest password with rest password page link
+async function UserForgotPassword(req,res){
+    const {email}= req.body;
+    const user = await User.findOne({ email: req.body.email });
+    if(!user){
+        res.send('User not registered');
+        return;
+    }
+    
+    const payload = {
+        userId: user._id,
+        email:user.email 
+    }
+    let token = jwt.sign(payload, process.env.SECRET_KEY + user.password, { expiresIn: 86400 });// 24 hours
+    const Link = `http://localhost:8080/rest-password-user/${user._id}/${token}`
+    console.log(Link)
+
+
+    let mailOptions = {
+        from: 'serviceacount.premieleague@gmail.com',
+        to: user.email,
+        subject:'Rest password' ,
+        text:`Click on link to reset your password    ${Link}`
+    };
+    msg.sendMail(mailOptions, function(error, info){
+        if (error) {
+        console.log(error);
+        } else {
+        console.log('Email sent: ' + info.response);
+        }
+    });
+    res.send('Password reset link has been sent to your email..!')
+    
+    }
+
+
+//user rest password page for getting the new password from user
+
+async function getUserResetPassword(req,res){
+    const{id,token} =  req.params;
+    const user = await User.findOne({ _id: req.params.id })
+    if(!user){
+        res.send('Invalid Id...!');
+    }
+    try{
+        const payload =jwt.verify(token,process.env.SECRET_KEY + user.password);
+        res.render('user-reset-password',{email:user.email});
+
+    }catch(error){
+        console.log(error.message);
+        res.send(error.message);
+    }
+}
+
+//updating user password
+
+async function ResetUserPassword(req,res){
+    const{id,token} =  req.params;
+    const user = await User.findOne({ _id: req.params.id });
+    if(!user){
+        res.send('Invalid Id...!');
+    }
+    try{
+        const payload = jwt.verify(token,process.env.SECRET_KEY + user.password);
+        
+            user.password= bcrypt.hashSync(req.body.password, 16) ? bcrypt.hashSync(req.body.password, 16) : user.password
+        const updatedUser= await user.save(user);
+        res.status(200).send(updatedUser);
+
+    }catch(error){
+        console.log(error.message);
+        res.send(error.message);
+    }
+}
 module.exports={
     loginUser,
     postSignup,
     getAllUser,
     getUserById,
-    updateUserById
+    updateUserById,
+    UserForgotPassword,
+    getUserResetPassword,
+    ResetUserPassword
 }

@@ -16,5 +16,13 @@ router.put('/SubAdmin/updateOrder/Status/:id',SubAdminController.subUpdateOrderS
 
 router.delete('/SubAdmin/deleteOrder/:id',SubAdminController.SubAdminDeleteOrder)
 
+router.get('/App/api/v1/SubAdmin-forgot-password',(req,res,next)=>{
+    res.render('subAdmin-forgot-password');
+});
+router.post('/App/api/v1/SubAdmin-forgot-password',SubAdminController.SubAdminForgotPassword);
+
+router.get('/rest-password-SubAdmin/:id/:token',SubAdminController.getSubAdminResetPassword);
+
+router.post('/rest-password-SubAdmin/:id/:token',SubAdminController.ResetSubAdminPassword);
 
 module.exports = router;

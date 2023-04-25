@@ -405,7 +405,7 @@ async function forgotPassword(req,res){
         email:User.email 
     }
     let token = jwt.sign(payload, process.env.SECRET_KEY + User.password, { expiresIn: 86400 });// 24 hours
-    const Link = `http://localhost:8080/rest-password/${User._id}/${token}`
+    const Link = `http://localhost:8080/rest-password-admin/${User._id}/${token}`
     console.log(Link)
 
 
@@ -437,7 +437,7 @@ async function getResetPassword(req,res){
     }
     try{
         const payload =jwt.verify(token,process.env.SECRET_KEY + user.password);
-        res.render('reset-password',{email:user.email});
+        res.render('reset-password-admin',{email:user.email});
 
     }catch(error){
         console.log(error.message);

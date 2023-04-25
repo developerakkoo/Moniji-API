@@ -15,13 +15,13 @@ router.post('/signup',
     authController.postSignup);
 
 router.get('/App/api/v1/Admin-forgot-password',(req,res,next)=>{
-        res.render('forgot-password');
+        res.render('forgot-password-admin');
     });
 router.post('/App/api/v1/Admin-forgot-password',authController.forgotPassword);
 
-router.get('/rest-password/:id/:token',authController.getResetPassword);
+router.get('/rest-password-admin/:id/:token',authController.getResetPassword);
 
-router.post('/rest-password/:id/:token',authController.ResetPassword);
+router.post('/rest-password-admin/:id/:token',authController.ResetPassword);
 
 router.put('/updateUser/status/:id',authController.acceptUserReq);
 
