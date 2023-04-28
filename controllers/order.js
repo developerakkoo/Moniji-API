@@ -53,16 +53,17 @@ exports.getAllOrder = async (req, res, next) =>{
         
         const order = await Order.find({}).populate("userId");
         if(order){
-            IO.getIO.emit('get:order',order);
             res.status(200).json({
                 order,
                 length: order.length,
                 message: "All Orders"
             })
+            IO.getIO.emit('get:order',order);
         }
     } catch (error) {
         res.status(500).json({
-            message: "Something went wrong!"
+            message: "Something went wrong!",
+            error
         })
     }
 }
