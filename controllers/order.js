@@ -16,8 +16,8 @@ exports.postOrder = async(req, res, next) =>{
         }
         const order = await new Order(orderObj);
         await order.save().then((result) => {
+            IO.getIO.emit('get:order',order);
             res.status(201).json({ message: 'order Created Successfully!', status: '201', orderId: result.orderId, });
-            IO.getIO().emit('get:order',order);
         })
         .catch(err => {
             res.status(500).json({ error: err.message, message: 'Something went wrong!' })
@@ -34,7 +34,7 @@ exports.getOrderByUserId = async(req, res, next) =>{
         const userid = req.params.userid;
         const order = await Order.find({userId: userid});
         if(order){
-            IO.getIO().emit('get:order',order);
+            IO.getIO.emit('get:order',order);
             res.status(200).json({
                 order,
                 message: "User Orders",
@@ -53,7 +53,7 @@ exports.getAllOrder = async (req, res, next) =>{
         
         const order = await Order.find({}).populate("userId");
         if(order){
-            IO.getIO().emit('get:order',order);
+            IO.getIO.emit('get:order',order);
             res.status(200).json({
                 order,
                 length: order.length,
@@ -73,7 +73,7 @@ exports.updateOrder = async (req, res, next) =>{
         const id = req.params.id;
         const order = await Order.findByIdAndUpdate(id, req.body);
         if(order){
-            IO.getIO().emit('get:order',order);
+            IO.getIO.emit('get:order',order);
             res.status(201).json({
                 order,
                 message: "Updated Order"
@@ -100,7 +100,7 @@ exports.deleteOrder = async(req, res, next) =>{
         const deletedOrder = await Order.deleteOne({
             _id : req.params.id
         });
-        IO.getIO().emit('get:order',deletedOrder);
+        IO.getIO.emit('get:order',deletedOrder);
         res.status(201).json({message: "order Deleted !"})
     }catch (error) {
         console.log(error)
