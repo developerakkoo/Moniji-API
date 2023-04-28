@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const IO = require('../socket')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const io = require('../socket');
+const io = require('./../socket');
 const path = require('path');
 require('dotenv').config();
 
@@ -82,7 +82,7 @@ async function postSignup (req, res, next) {
             res.status(201).send({message:`User registered successfully `,user})
         })
 
-        io.getIO().emit("get:user", SavedUser);
+        io.getIO.emit("get:user", SavedUser);
         
     }    catch(error){
         res.status(500).send({message:`Error while creating User ${error.message}`})
@@ -99,7 +99,7 @@ async function getAllUser (req, res, next){
                     message: "All user Found!"
                 })
             }
-            IO.getIO().emit('get:user',user);
+            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
@@ -115,7 +115,7 @@ async function getUserById  (req, res, next){
                     message: "user Found!"
                 })
             }
-            IO.getIO().emit('get:user',user);
+            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
@@ -131,7 +131,7 @@ async function updateUserById  (req, res, next){
                     message: "user Updated!"
                 })
             }
-            IO.getIO().emit('get:user',user);
+            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }

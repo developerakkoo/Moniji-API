@@ -2,7 +2,7 @@ const Order = require("./../models/order");
 const Admin = require('../models/admin');
 const aleaRNGFactory = require("number-generator/lib/aleaRNGFactory");
 const { uInt32 } = aleaRNGFactory(2);
-const IO = require("../socket");
+const IO = require("./../socket");
 exports.postOrder = async(req, res, next) =>{
     try {
         const orderObj={

@@ -5,7 +5,7 @@ const Order = require("./../models/order");
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const IO =  require('../socket')
+const IO =  require('./../socket');
 const path = require('path');
 const csvWriter =  require('csv-writer');
 require('dotenv').config();

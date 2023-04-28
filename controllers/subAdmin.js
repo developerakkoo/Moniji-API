@@ -5,7 +5,7 @@ const User= require('../models/user')
 const Order = require("./../models/order");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const IO = require('../socket') 
+const IO = require('./../socket'); 
 const path = require('path');
 require('dotenv').config();
 
