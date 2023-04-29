@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const IO = require('../socket')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const io = require('../socket');
+const io = require('./../socket');
 const path = require('path');
 require('dotenv').config();
 

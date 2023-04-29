@@ -66,6 +66,12 @@ app.get('/Export-to-excel-YearlyOrder', (req, res,next)=>{
   })
 })
 
+app.get('/Export-to-excel-CostumeDateOrder', (req, res,next)=>{
+  res.status(200).json({
+    file2:"http://localhost:8000/controllers\public\CostumeDateOrder.csv"
+  })
+})
+
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
