@@ -12,7 +12,7 @@ const multer = require("multer");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 require('dotenv').config();
-const MONGODB_URI = "mongodb+srv://monijiapp:monijiapp@moniji-cluster.o7zpfdw.mongodb.net/moniji?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb+srv://moniji:moniji@cluster0.ut2u9zs.mongodb.net/moniji";
 //const MONGODB_URI ="mongodb://localhost:27017/moniji_App";
 
 //ROUTES
@@ -40,15 +40,31 @@ app.use(adminRoute);
 app.use(userRoute);
 app.use(orderRoute);
 app.use(SubAdminRoute);
-app.get('/excel', (req, res,next)=>{
+app.get('/Export-to-excel-weeklyOrder', (req, res,next)=>{
   res.status(200).json({
     file:"http://localhost:8000/controllers\public\weeklyOrder.csv",
-    file1:"http://localhost:8000/controllers\public\MonthlyOrder.csv",
+  })
+})
+app.get('/Export-to-excel-oneMonthOrder', (req, res,next)=>{
+  res.status(200).json({
+    file1:"http://localhost:8000/controllers\public\oneMonthOrder.csv"
+  })
+})
+app.get('/Export-to-excel-ThreeMonthOrder', (req, res,next)=>{
+  res.status(200).json({
+    file1:"http://localhost:8000/controllers\public\ThreeMonthOrder.csv"
+  })
+})
+app.get('/Export-to-excel-sixMonthOrder', (req, res,next)=>{
+  res.status(200).json({
+    file1:"http://localhost:8000/controllers\public\sixMonthOrder.csv"
+  })
+})
+app.get('/Export-to-excel-YearlyOrder', (req, res,next)=>{
+  res.status(200).json({
     file2:"http://localhost:8000/controllers\public\YearlyOrder.csv"
   })
 })
-
-
 
 
 app.use(function (req, res, next) {

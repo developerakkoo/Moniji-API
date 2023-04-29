@@ -1,3 +1,4 @@
+const moment = require('moment/moment');
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -52,7 +53,23 @@ const orderSchema = new Schema({
     userId:{
         type: Schema.Types.ObjectId,
         ref: "User"
-    }
+    },
+    Date:{
+        type:String,
+        default:moment().format('DD-MM-YY')
+    },
+    Day:{
+        type:String,
+        default:moment().format('DD')
+    },
+    Month:{
+        type:String,
+        default:moment().format('MM')
+    },
+    Year:{
+        type:String,
+        default:moment().format('YY')
+    },
 }, {timestamps : true})
 
 

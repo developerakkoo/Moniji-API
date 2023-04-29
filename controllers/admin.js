@@ -1,4 +1,5 @@
 const Admin = require('../models/admin');
+const moment = require('moment')
 const SubAdmin= require('../models/SubAdmin.model');
 const User= require('../models/user')
 const Order = require("./../models/order");
@@ -12,21 +13,83 @@ require('dotenv').config();
 const writer = csvWriter.createObjectCsvWriter(
     {path:path.resolve(__dirname,'public/weeklyOrder.csv'),
     header:[
-    { id: '_id', title: 'ID' },
-    { id: 'createdAt', title: 'Week'}
+        { id: 'orderId', title: 'orderId'},
+        { id: 'diameter', title: 'diameter'},
+        { id: 'length', title: 'length' },
+        { id: 'make', title: 'make'},
+        { id: 'quantity', title: 'quantity'},
+        { id: 'status', title: 'status' },
+        { id: 'type', title: 'type'},
+        { id: 'message', title: 'message' },
+        { id: 'Date', title: 'Date'},
 ]});
 const writer1 = csvWriter.createObjectCsvWriter(
-    {path:path.resolve(__dirname,'public/MonthlyOrder.csv'),
+    {path:path.resolve(__dirname,'public/oneMonthOrder.csv'),
     header:[ 
-    { id: '_id', title: 'ID' },
-    { id: 'createdAt', title: 'Week'}
+        { id: 'orderId', title: 'orderId'},
+        { id: 'diameter', title: 'diameter'},
+        { id: 'length', title: 'length' },
+        { id: 'make', title: 'make'},
+        { id: 'quantity', title: 'quantity'},
+        { id: 'status', title: 'status' },
+        { id: 'type', title: 'type'},
+        { id: 'message', title: 'message' },
+        { id: 'Date', title: 'Date'},
 ]});
 const writer2 = csvWriter.createObjectCsvWriter(
+    {path:path.resolve(__dirname,'public/ThreeMonthOrder.csv'),
+    header:[ 
+        { id: 'orderId', title: 'orderId'},
+        { id: 'diameter', title: 'diameter'},
+        { id: 'length', title: 'length' },
+        { id: 'make', title: 'make'},
+        { id: 'quantity', title: 'quantity'},
+        { id: 'status', title: 'status' },
+        { id: 'type', title: 'type'},
+        { id: 'message', title: 'message' },
+        { id: 'Date', title: 'Date'},
+]});
+const writer3 = csvWriter.createObjectCsvWriter(
+    {path:path.resolve(__dirname,'public/sixMonthOrder.csv'),
+    header:[ 
+        { id: 'orderId', title: 'orderId'},
+        { id: 'diameter', title: 'diameter'},
+        { id: 'length', title: 'length' },
+        { id: 'make', title: 'make'},
+        { id: 'quantity', title: 'quantity'},
+        { id: 'status', title: 'status' },
+        { id: 'type', title: 'type'},
+        { id: 'message', title: 'message' },
+        { id: 'Date', title: 'Month'},
+]});
+
+const writer4 = csvWriter.createObjectCsvWriter(
     {path:path.resolve(__dirname,'public/YearlyOrder.csv'),
     header:[
-        { id: '_id', title: 'ID' },
-        { id: 'createdAt', title: 'Week'}
+        { id: 'orderId', title: 'orderId'},
+        { id: 'diameter', title: 'diameter'},
+        { id: 'length', title: 'length' },
+        { id: 'make', title: 'make'},
+        { id: 'quantity', title: 'quantity'},
+        { id: 'status', title: 'status' },
+        { id: 'type', title: 'type'},
+        { id: 'message', title: 'message' },
+        { id: 'year', title: 'year'}
     ]});
+
+    const writer5 = csvWriter.createObjectCsvWriter(
+        {path:path.resolve(__dirname,'public/CostumeDateOrder.csv'),
+        header:[
+            { id: 'orderId', title: 'orderId'},
+            { id: 'diameter', title: 'diameter'},
+            { id: 'length', title: 'length' },
+            { id: 'make', title: 'make'},
+            { id: 'quantity', title: 'quantity'},
+            { id: 'status', title: 'status' },
+            { id: 'type', title: 'type'},
+            { id: 'message', title: 'message' },
+            { id: 'Date', title: 'Date'}
+        ]});
 
 const postLogin = (req, res, next) => {
     const email = req.body.email;
@@ -55,8 +118,8 @@ const postLogin = (req, res, next) => {
                 token: token,
                 userId: loadedUser._id.toString()
             }
+            IO.getIO().emit('post:adminLogin',postResponse);
             res.status(200).json({message: 'Sign In Successful',postResponse})
-                IO.getIO.emit('post admin Login',postResponse);
         });
     }).catch(err =>{
         console.log(err)
@@ -66,7 +129,6 @@ const postLogin = (req, res, next) => {
         res.status(400).json({message: error.message, status:'error'});
     })
 }
-
 
 const postSignup = (req, res, next) => {
     const email = req.body.email;
@@ -87,7 +149,7 @@ const postSignup = (req, res, next) => {
             })
             return admin.save();
         }).then((result) => {
-            //IO.getIO.emit('post admin Signup',result);
+            IO.getIO().emit('post:adminSignup',result);
             return res.status(201).json({message: 'Admin Created Successfully!', status: '201', userId: result._id});
         
         })
@@ -114,8 +176,28 @@ async function acceptUserReq(req, res, next){
         userId:saveUser._id,
         isActive:saveUser.isActive
     }
+    IO.getIO().emit('get:user',postResponse);
     res.status(200).json({message: 'User updated Successfully!',postResponse});
-    IO.getIO.emit('admin accept User Req',postResponse);
+}
+
+async function BlockUser(req, res, next){
+    const savedAdmin =  await Admin.findById({_id:req.params.id});
+    if (!savedAdmin){
+        return  res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const savedUser = await User.findById({_id:req.body.id});
+    if(!savedUser){
+        return res.status(400).json({message: 'User dose not exist !'});
+    }
+    savedUser.isBlocked = req.body.isBlocked 
+
+    const saveUser = await savedUser.save();
+    const postResponse={
+        userId:saveUser._id,
+        isBlocked:saveUser.isBlocked
+    }
+    IO.getIO().emit('get:user',postResponse);
+    res.status(200).json({message: 'User updated Successfully!',postResponse});
 }
 
 async function UpdateOrderReq(req, res, next){
@@ -133,8 +215,8 @@ async function UpdateOrderReq(req, res, next){
 const  postResponse={
     isAccepted:updateOrder.isAccepted
 }
+    IO.getIO().emit('put:order',postResponse);
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
-    IO.getIO().emit('get:order',postResponse);
 }
 async function UpdateOrderStatus(req, res, next){
     const savedAdmin =  await Admin.findOne({_id:req.params.id});
@@ -147,11 +229,10 @@ async function UpdateOrderStatus(req, res, next){
     }
     savedOrder.status = req.body.status 
     savedOrder.message = req.body.message 
-  
     const updateOrder = await savedOrder.save();
 
+    IO.getIO().emit('get:orderStatus',updateOrder);
     res.status(200).json({message: 'Order updated Successfully!',updateOrder});
-    IO.getIO().emit('get:order',updateOrder);
 }
 
 async function GrantSubAdmin(req, res, next){
@@ -178,8 +259,8 @@ async function GrantSubAdmin(req, res, next){
         canDeleteOrder:UpdatedSubAdmin.canDeleteOrder
         
     }
+    IO.getIO().emit('get:ActiveSubAdmin',postResponse);
     res.status(200).json({message: 'User updated Successfully!',postResponse});
-    IO.getIO.emit('admin Grant Sub Admin',postResponse);
 }
 
 async function totalActiveUser(req, res, next){
@@ -197,8 +278,8 @@ async function totalActiveUser(req, res, next){
         }
     ]
     const user = await User.aggregate(pipeline)
+    IO.getIO().emit('get:ActiveUser',user);
     res.status(200).json({message: 'User fetched Successfully!',user});
-    IO.getIO.emit('total Active User',user);
 }
 async function totalNotActiveUser(req, res, next){
     const savedAdmin =  await Admin.findById({_id:req.params.id});
@@ -215,8 +296,8 @@ async function totalNotActiveUser(req, res, next){
         }
     ]
     const user = await User.aggregate(pipeline)
+    IO.getIO().emit('get:NotActiveUser',user);
     res.status(200).json({message: 'User fetched Successfully!',user});
-    IO.getIO.emit('Not Active User',user);
 }
 
 async function totalBlockedUser(req, res, next){
@@ -235,8 +316,8 @@ async function totalBlockedUser(req, res, next){
         }
     ]
     const user = await User.aggregate(pipeline)
+    IO.getIO().emit('get:BlockedUser',user);
     res.status(200).json({message: 'User fetched Successfully!',user});
-    IO.getIO.emit('total Blocked User',user);
 }
 
 async function totalUser(req, res, next){
@@ -251,8 +332,8 @@ async function totalUser(req, res, next){
         }
     ]
     const user = await User.aggregate(pipeline)
+    IO.getIO().emit('get:TotalUser',user);
     res.status(200).json({message: 'User fetched Successfully!',user});
-    IO.getIO.emit('Total User',user);
 }
 
 async function MonthlyActiveUser(req, res, next){
@@ -275,8 +356,8 @@ async function MonthlyActiveUser(req, res, next){
         }
     ]
     const user = await User.aggregate(pipeline)
+    IO.getIO().emit('get:monthlyActiveUser',user);
     res.status(200).json({message: 'User fetched Successfully!',user});
-    IO.getIO.emit('active  User Req',user);
 }
 
 async function sortOrderByStatus(req, res, next){
@@ -293,37 +374,185 @@ async function sortOrderByStatus(req, res, next){
         }
     ]
     const order = await Order.aggregate(pipeline)
+    IO.getIO().emit('get:OrderByStatus',order);
     res.status(200).json({message: 'User fetched Successfully!',order});
-    IO.getIO.emit('sort Order By Status',order);
+}
+async function OrderByWeek(req, res, next){
+    console.log(req.params.id)
+    const savedAdmin =  await Admin.findById({_id:req.params.id});
+    if (!savedAdmin){
+        return  res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const pipeline =[
+    {
+        $match: {
+        Date: {
+            $gte: moment().subtract(1, 'weeks').startOf('isoWeek').format('DD-MM-YY'),
+            $lte: moment().subtract(1, 'weeks').endOf('isoWeek').format('DD-MM-YY'),
+        },
+        },
+    },
+    {
+        '$project': {
+            'orderId':'$orderId',
+            'userId':'$userId',
+            'diameter':'$diameter',
+            'length':'$length',
+            'quantity':'$quantity',
+            'make':'$make',
+            'status':'$status',
+            'type':'$type',
+            'Message':'$message',
+            'Date' : '$Date',
+        }
+    },
+    ]
+
+    const order = await Order.aggregate(pipeline);
+    console.log(order[0].orderDetail)
+    IO.getIO().emit('get:OrderByWeek',order);
+    const message ={
+        message: 'order fetched Successfully!',
+        
+    }
+    res.status(200).json(order);
+        writer.writeRecords(order)
+        .then(() =>{
+        console.log("DONE!");
+        }).catch((error) =>{
+        console.log(error);
+    })
+    
 }
 
-async function OrderByMonth(req, res, next){
+
+
+async function OrderOfLastOneMonth(req, res, next){
     const savedAdmin =  await Admin.findById({_id:req.params.id});
     if (!savedAdmin){
         return  res.status(400).json({message: 'User dose not have admin access!'});
     }
     const pipeline =
     [
+        { 
+            $match: {
+            Month: {
+                $gte: moment().subtract(2, 'months').startOf('isoMonth').format('MM'),
+                $lte: moment().subtract(1, 'months').endOf('isoMonth').format('MM'),
+            },
+            },
+        },
         {
             '$project': {
-            'createdAt': {
-            '$month': '$createdAt'
+                'orderId':'$orderId',
+                'userId':'$userId',
+                'diameter':'$diameter',
+                'length':'$length',
+                'quantity':'$quantity',
+                'make':'$make',
+                'status':'$status',
+                'type':'$type',
+                'Message':'$message',
+                'isAccepted':'$isAccepted',
+                'Date' : '$Date',
+                
             }
-        }
-        }
+        },
     ]
     const order = await Order.aggregate(pipeline)
-    res.status(200).json({message: 'User fetched Successfully!',order});
-    //IO.getIO.emit('OrderByMonth',postResponse);
+    console.log('order>>',order)
+    console.log('>>',order.length)
+    IO.getIO().emit('get:OrderByMonth',order);
+    res.status(200).json(order);
     writer1.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
-})
+    })
+    
+}
+async function OrderOfThreeMonth(req, res, next){
+    const savedAdmin =  await Admin.findById({_id:req.params.id});
+    if (!savedAdmin){
+        return  res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const pipeline =
+    [
+        { 
+            $match: {
+            Month: {
+                $gte: moment().subtract(3, 'months').startOf('isoMonth').format('MM'),
+                $lte: moment().subtract(1, 'months').endOf('isoMonth').format('MM'),
+            },
+            },
+        },
+        {
+            '$project': {
+                'orderId':'$orderId',
+                'userId':'$userId',
+                'diameter':'$diameter',
+                'length':'$length',
+                'quantity':'$quantity',
+                'make':'$make',
+                'status':'$status',
+                'type':'$type',
+                'Message':'$message',
+                'Date' : '$Date'
+            }
+        },
+    ]
+    const order = await Order.aggregate(pipeline)
+    // console.log(order)
+    IO.getIO().emit('get:OrderByMonth',order);
+    res.status(200).json(order);
+        writer2.writeRecords(order)
+        .then(() =>{
+        console.log("DONE!");
+        }).catch((error) =>{
+        console.log(error);
+    })
+}
 
-    
-    
+async function OrderOfSixMonth(req, res, next){
+    const savedAdmin =  await Admin.findById({_id:req.params.id});
+    if (!savedAdmin){
+        return  res.status(400).json({message: 'User dose not have admin access!'});
+    }
+    const pipeline =
+    [
+        { 
+            $match: {
+            Month: {
+                $gte: moment().subtract(6, 'months').startOf('isoMonth').format('MM'),
+                $lte: moment().subtract(1, 'months').endOf('isoMonth').format('MM'),
+            },
+            },
+        },
+        {
+            '$project': {
+                'orderId':'$orderId',
+                'userId':'$userId',
+                'diameter':'$diameter',
+                'length':'$length',
+                'quantity':'$quantity',
+                'make':'$make',
+                'status':'$status',
+                'type':'$type',
+                'Message':'$message',
+                'Date' : '$Date',
+            }
+        },
+    ]
+    const order = await Order.aggregate(pipeline)
+    IO.getIO().emit('get:OrderByMonth',order);
+    res.status(200).json(order);
+        writer3.writeRecords(order)
+        .then(() =>{
+        console.log("DONE!");
+        }).catch((error) =>{
+        console.log(error);
+    })
 }
 
 async function OrderByYear(req, res, next){
@@ -335,50 +564,82 @@ async function OrderByYear(req, res, next){
     [
         {
             '$project': {
-            'createdAt': {
-            '$year': '$createdAt'
-            }
+            'orderId':'$orderId',
+            'userId':'$userId',
+            'diameter':'$diameter',
+            'length':'$length',
+            'quantity':'$quantity',
+            'make':'$make',
+            'status':'$status',
+            'type':'$type',
+            'Message':'$message',
+            'Date' : '$Date',
+            'year': {'$year': '$createdAt'}
         }
         }
     ]
     const order = await Order.aggregate(pipeline)
+    IO.getIO().emit('get:OrderByYear',order);
     res.status(200).json({message: 'User fetched Successfully!',order});
-    //IO.getIO.emit('OrderByYear',postResponse);
-    writer2.writeRecords(order)
+    writer4.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
-})
+    })
 }
 
-async function OrderByWeek(req, res, next){
-    console.log(req.params.id)
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    console.log(">>>>",savedAdmin)
+
+async function OrderOfCostumeDate(req, res, next){
+    console.log('Start',req.query.fromDate)
+    console.log('end',req.query.toDate)
+    console.log('head',req.headers.id)
+
+    const savedAdmin =  await Admin.findById({_id:req.headers.id});
     if (!savedAdmin){
         return  res.status(400).json({message: 'User dose not have admin access!'});
     }
+    const Start =req.query.fromDate
+    const End =req.query.toDate
     const pipeline =
     [
+        { 
+            $match: {
+            Month: {
+                $gte: Start,
+                $lte: End,
+            },
+            },
+        },
         {
             '$project': {
-            'createdAt': {
-            '$week': '$createdAt'
+                'orderId':'$orderId',
+                'userId':'$userId',
+                'diameter':'$diameter',
+                'length':'$length',
+                'quantity':'$quantity',
+                'make':'$make',
+                'status':'$status',
+                'type':'$type',
+                'Message':'$message',
+                'Date' : '$Date',
+                'isAccepted':'$isAccepted',
+                
             }
-        }
-        }
+        },
     ]
-    const order = await Order.aggregate(pipeline);
+    const order = await Order.aggregate(pipeline)
+    IO.getIO().emit('get:OrderByMonth',order);
     res.status(200).json(order);
-    //IO.getIO.emit('OrderByWeek',postResponse);
-    writer.writeRecords(order)
+    writer5.writeRecords(order)
     .then(() =>{
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
-})
+    })
+    
 }
+
 
 
 
@@ -469,6 +730,7 @@ async function ResetPassword(req,res){
 
 module.exports={
     acceptUserReq,
+    BlockUser,
     postLogin,
     postSignup,
     UpdateOrderReq,
@@ -480,9 +742,12 @@ module.exports={
     totalUser,
     MonthlyActiveUser,
     sortOrderByStatus,
-    OrderByMonth,
-    OrderByYear,
     OrderByWeek,
+    OrderOfLastOneMonth,
+    OrderOfThreeMonth,
+    OrderOfSixMonth,
+    OrderByYear,
+    OrderOfCostumeDate,
     forgotPassword,
     getResetPassword,
     ResetPassword

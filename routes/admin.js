@@ -25,6 +25,8 @@ router.post('/rest-password-admin/:id/:token',authController.ResetPassword);
 
 router.put('/updateUser/status/:id',authController.acceptUserReq);
 
+router.put('/BlockUser/:id',authController.BlockUser);
+
 router.put('/updateOrder/:id',authController.UpdateOrderReq);
 
 router.put('/updateOrder/Status/:id',authController.UpdateOrderStatus);
@@ -35,7 +37,7 @@ router.get('/ActiveUsers/:id',authController.totalActiveUser);
 
 router.get('/notActiveUsers/:id',authController.totalNotActiveUser);
 
-router.get('/BlockedUsers/:id',authController.totalBlockedUser);
+router.put('/BlockedUsers/:id',authController.totalBlockedUser);
 
 router.get('/TotalUsers/:id',authController.totalUser);
 
@@ -43,10 +45,17 @@ router.get('/MonthlyActiveUsers/:id',authController.MonthlyActiveUser);
 
 router.get('/orderByStatus/:id',authController.sortOrderByStatus);
 
-router.get('/orderByMonthly/:id',authController.OrderByMonth);
+router.get('/orderByWeek/:id',authController.OrderByWeek);
+
+router.get('/OrderOfLastOneMonth/:id',authController.OrderOfLastOneMonth);
+
+router.get('/OrderOfLastThreeMonth/:id',authController.OrderOfThreeMonth);
+
+router.get('/OrderOfLastSixMonth/:id',authController.OrderOfSixMonth);
 
 router.get('/orderByYear/:id',authController.OrderByYear);
 
-router.get('/orderByWeek/:id',authController.OrderByWeek);
+router.get('/orderByCostumeDate',authController.OrderOfCostumeDate);
+
 
 module.exports = router;
