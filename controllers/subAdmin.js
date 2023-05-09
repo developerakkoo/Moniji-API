@@ -33,8 +33,8 @@ async function postLogin (req, res, next) {
             token: token,
             userId: SavedUser._id
         }
+        IO.getIO().emit('post:subAdmin',postResponse);
         res.status(200).json({message: 'Sign In Successful',postResponse});
-        //IO.getIO.emit('postLogin',postResponse);
     }catch(error){
         res.status(400).json({
             message: `something went wrong ${error.message}`,
@@ -54,7 +54,7 @@ async function postSignup  (req, res, next) {
     return res.status(400).json({message: 'User with email Already Exists'});
     }
             const result = await SubAdmin.create(SubAdminObj);
-            IO.getIO.emit('Sub admin signup',result);
+            IO.getIO().emit('post:SubAdmin',result);
             return res.status(201).json({message: 'Sub Admin Created Successfully!', userId: result._id});
             
         }
@@ -87,8 +87,8 @@ async function subAcceptUserReq(req, res, next){
         userId:saveUser._id,
         isActive:saveUser.isActive
     }
+    IO.getIO().emit('put:subAdmin',postResponse);
     res.status(200).json({message: 'User updated Successfully!',postResponse});
-    IO.getIO.emit('sub admin accept user req',postResponse);
 }
 
 async function subUpdateOrderReq(req, res, next){
@@ -111,8 +111,8 @@ async function subUpdateOrderReq(req, res, next){
     const  postResponse={
     isAccepted:updateOrder.isAccepted
 }
+    IO.getIO().emit('get:subAdmin',postResponse);
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
-    IO.getIO.emit('sub admin accept order req',postResponse);
 }
 
 async function subUpdateOrderStatus(req, res, next){
@@ -141,8 +141,8 @@ const  postResponse={
     message:updateOrder.message,
     isAccepted:updateOrder.isAccepted
 }
+    IO.getIO().emit('get:subAdminUpdateOrder',postResponse);
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
-    IO.getIO.emit('sub Update Order Status',postResponse);
 }
 
 
@@ -180,8 +180,8 @@ async function getAllSubAdmin (req, res, next){
         if(sub){
             res.status(200).json({sub})
         }
-        res.status(201).json({message: "order Deleted !"})
         IO.getIO().emit('get:subadmin',sub);
+        res.status(201).json({message: "order Deleted !"})
     }catch (error) {
         console.log(error)
         res.status(500).json({

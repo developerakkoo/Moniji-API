@@ -80,9 +80,9 @@ async function postSignup (req, res, next) {
         }).then((user) =>{
             
             res.status(201).send({message:`User registered successfully `,user})
+            io.getIO().emit("get:user", SavedUser);
         })
 
-        io.getIO.emit("get:user", SavedUser);
         
     }    catch(error){
         res.status(500).send({message:`Error while creating User ${error.message}`})
@@ -98,8 +98,8 @@ async function getAllUser (req, res, next){
                     user,
                     message: "All user Found!"
                 })
+                IO.getIO().emit('get:user',user);
             }
-            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
@@ -114,8 +114,8 @@ async function getUserById  (req, res, next){
                     user,
                     message: "user Found!"
                 })
+                IO.getIO().emit('get:user',user);
             }
-            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
@@ -130,8 +130,8 @@ async function updateUserById  (req, res, next){
                     user,
                     message: "user Updated!"
                 })
+                IO.getIO().emit('get:user',user);
             }
-            IO.getIO.emit('get:user',user);
     } catch (error) {
         res.status(500).json({ error: error.message, message: 'Something went wrong!' })
     }
