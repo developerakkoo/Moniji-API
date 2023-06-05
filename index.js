@@ -1,9 +1,9 @@
 const express = require("express");
-const dotenv = require("dotenv");
 const path = require("path");
 const cors = require("cors");
 const axios = require("axios");
 const fs = require('fs');
+
 
 
 const { v4: uuidv4 } = require("uuid");
@@ -20,7 +20,8 @@ const MONGODB_URI = "mongodb+srv://moniji:moniji@cluster0.ut2u9zs.mongodb.net/mo
 const adminRoute = require("./routes/admin");
 const userRoute = require("./routes/user");
 const orderRoute = require("./routes/order");
-const SubAdminRoute =  require('./routes/SubAdmin.route')
+const SubAdminRoute =  require('./routes/SubAdmin.route');
+const productRoute = require('./routes/product.route');
 
 
 const app = express();
@@ -40,6 +41,8 @@ app.use(adminRoute);
 app.use(userRoute);
 app.use(orderRoute);
 app.use(SubAdminRoute);
+app.use(productRoute);
+
 app.get('/Export-to-excel-weeklyOrder', (req, res,next)=>{
   res.status(200).json({
     file:"http://localhost:8000/controllers\public\weeklyOrder.csv",
@@ -126,15 +129,14 @@ const diskStorage = multer.diskStorage({
   //   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
   // });
   
-  mongoose
-    .connect(MONGODB_URI, {
+  mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       
     })
     .then((result) => {
       const server = app.listen(8080);
-      console.log("app is running")
+      console.log(`app is running ${port}`)
       const io = require("./socket").init(server);
   
       io.on("connection", (socket) => {

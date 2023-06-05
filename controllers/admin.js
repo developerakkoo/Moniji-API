@@ -1,5 +1,5 @@
 const Admin = require('../models/admin');
-const moment = require('moment')
+const moment = require('moment');
 const SubAdmin= require('../models/SubAdmin.model');
 const User= require('../models/user')
 const Order = require("./../models/order");
@@ -75,9 +75,9 @@ const writer4 = csvWriter.createObjectCsvWriter(
         { id: 'type', title: 'type'},
         { id: 'message', title: 'message' },
         { id: 'year', title: 'year'}
-    ]});
+]});
 
-    const writer5 = csvWriter.createObjectCsvWriter(
+const writer5 = csvWriter.createObjectCsvWriter(
         {path:path.resolve(__dirname,'public/CostumeDateOrder.csv'),
         header:[
             { id: 'orderId', title: 'orderId'},
@@ -89,7 +89,7 @@ const writer4 = csvWriter.createObjectCsvWriter(
             { id: 'type', title: 'type'},
             { id: 'message', title: 'message' },
             { id: 'Date', title: 'Date'}
-        ]});
+]});
 
 const postLogin = (req, res, next) => {
     const email = req.body.email;
@@ -161,10 +161,6 @@ const postSignup = (req, res, next) => {
 }
 
 async function acceptUserReq(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const savedUser = await User.findById({_id:req.body.id});
     if(!savedUser){
         return res.status(400).json({message: 'User dose not exist !'});
@@ -181,10 +177,6 @@ async function acceptUserReq(req, res, next){
 }
 
 async function BlockUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const savedUser = await User.findById({_id:req.body.id});
     if(!savedUser){
         return res.status(400).json({message: 'User dose not exist !'});
@@ -201,10 +193,6 @@ async function BlockUser(req, res, next){
 }
 
 async function UpdateOrderReq(req, res, next){
-    const savedAdmin =  await Admin.findOne({_id:req.params.id});
-    if (!savedAdmin){
-        return res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const savedOrder = await Order.findOne({_id:req.body.id});
     if(!savedOrder){
         return res.status(400).json({message: 'Order dose not exist !'});
@@ -219,10 +207,6 @@ const  postResponse={
     res.status(200).json({message: 'Order updated Successfully!',postResponse});
 }
 async function UpdateOrderStatus(req, res, next){
-    const savedAdmin =  await Admin.findOne({_id:req.params.id});
-    if (!savedAdmin){
-        return res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const savedOrder = await Order.findOne({_id:req.body.id});
     if(!savedOrder){
         return res.status(400).json({message: 'Order dose not exist!'});
@@ -236,10 +220,6 @@ async function UpdateOrderStatus(req, res, next){
 }
 
 async function GrantSubAdmin(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const savedUser = await SubAdmin.findById({_id:req.body.id});
     if(!savedUser){
         return res.status(400).json({message: 'User dose not exist !'});
@@ -260,14 +240,10 @@ async function GrantSubAdmin(req, res, next){
         
     }
     IO.getIO().emit('get:ActiveSubAdmin',postResponse);
-    res.status(200).json({message: 'User updated Successfully!',postResponse});
+    res.status(200).json({message: 'SubAdmin updated Successfully!',postResponse});
 }
 
 async function totalActiveUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =[
         {
             '$match': {
@@ -282,10 +258,6 @@ async function totalActiveUser(req, res, next){
     res.status(200).json({message: 'User fetched Successfully!',user});
 }
 async function totalNotActiveUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =[
         {
             '$match': {
@@ -301,10 +273,6 @@ async function totalNotActiveUser(req, res, next){
 }
 
 async function totalBlockedUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         {
@@ -321,10 +289,6 @@ async function totalBlockedUser(req, res, next){
 }
 
 async function totalUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         {
@@ -337,10 +301,6 @@ async function totalUser(req, res, next){
 }
 
 async function MonthlyActiveUser(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         {
@@ -361,10 +321,6 @@ async function MonthlyActiveUser(req, res, next){
 }
 
 async function sortOrderByStatus(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         {
@@ -375,14 +331,10 @@ async function sortOrderByStatus(req, res, next){
     ]
     const order = await Order.aggregate(pipeline)
     IO.getIO().emit('get:OrderByStatus',order);
-    res.status(200).json({message: 'User fetched Successfully!',order});
+    res.status(200).json({message: 'Order fetched Successfully!',order});
 }
 async function OrderByWeek(req, res, next){
     console.log(req.params.id)
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =[
     {
         $match: {
@@ -412,7 +364,7 @@ async function OrderByWeek(req, res, next){
     console.log(order[0].orderDetail)
     IO.getIO().emit('get:OrderByWeek',order);
     const message ={
-        message: 'order fetched Successfully!',
+        message: 'Order fetched Successfully!',
         
     }
     res.status(200).json(order);
@@ -428,10 +380,6 @@ async function OrderByWeek(req, res, next){
 
 
 async function OrderOfLastOneMonth(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         { 
@@ -473,10 +421,6 @@ async function OrderOfLastOneMonth(req, res, next){
     
 }
 async function OrderOfThreeMonth(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         { 
@@ -515,10 +459,6 @@ async function OrderOfThreeMonth(req, res, next){
 }
 
 async function OrderOfSixMonth(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         { 
@@ -556,10 +496,6 @@ async function OrderOfSixMonth(req, res, next){
 }
 
 async function OrderByYear(req, res, next){
-    const savedAdmin =  await Admin.findById({_id:req.params.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const pipeline =
     [
         {
@@ -594,11 +530,6 @@ async function OrderOfCostumeDate(req, res, next){
     console.log('Start',req.query.fromDate)
     console.log('end',req.query.toDate)
     console.log('head',req.headers.id)
-
-    const savedAdmin =  await Admin.findById({_id:req.headers.id});
-    if (!savedAdmin){
-        return  res.status(400).json({message: 'User dose not have admin access!'});
-    }
     const Start =req.query.fromDate
     const End =req.query.toDate
     const pipeline =

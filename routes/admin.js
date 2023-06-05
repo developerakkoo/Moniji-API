@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const authController = require('./../controllers/admin');
+const verifyAdmin = require ('../middleware/IsAdmin')
 
 const router = express.Router();
 
@@ -23,39 +24,39 @@ router.get('/rest-password-admin/:id/:token',authController.getResetPassword);
 
 router.post('/rest-password-admin/:id/:token',authController.ResetPassword);
 
-router.put('/updateUser/status/:id',authController.acceptUserReq);
+router.put('/updateUser/status/:id',verifyAdmin.isAdmin,authController.acceptUserReq);
 
-router.put('/BlockUser/:id',authController.BlockUser);
+router.put('/BlockUser/:id',verifyAdmin.isAdmin,authController.BlockUser);
 
-router.put('/updateOrder/:id',authController.UpdateOrderReq);
+router.put('/updateOrder/:id',verifyAdmin.isAdmin,authController.UpdateOrderReq);
 
-router.put('/updateOrder/Status/:id',authController.UpdateOrderStatus);
+router.put('/updateOrder/Status/:id',verifyAdmin.isAdmin,authController.UpdateOrderStatus);
 
-router.put('/update/subAdmin/:id',authController.GrantSubAdmin)
+router.put('/update/subAdmin/:id',verifyAdmin.isAdmin,authController.GrantSubAdmin)
 
-router.get('/ActiveUsers/:id',authController.totalActiveUser);
+router.get('/ActiveUsers/:id',verifyAdmin.isAdmin,authController.totalActiveUser);
 
-router.get('/notActiveUsers/:id',authController.totalNotActiveUser);
+router.get('/notActiveUsers/:id',verifyAdmin.isAdmin,authController.totalNotActiveUser);
 
-router.put('/BlockedUsers/:id',authController.totalBlockedUser);
+router.put('/BlockedUsers/:id',verifyAdmin.isAdmin,authController.totalBlockedUser);
 
-router.get('/TotalUsers/:id',authController.totalUser);
+router.get('/TotalUsers/:id',verifyAdmin.isAdmin,authController.totalUser);
 
-router.get('/MonthlyActiveUsers/:id',authController.MonthlyActiveUser);
+router.get('/MonthlyActiveUsers/:id',verifyAdmin.isAdmin,authController.MonthlyActiveUser);
 
-router.get('/orderByStatus/:id',authController.sortOrderByStatus);
+router.get('/orderByStatus/:id',verifyAdmin.isAdmin,authController.sortOrderByStatus);
 
-router.get('/orderByWeek/:id',authController.OrderByWeek);
+router.get('/orderByWeek/:id',verifyAdmin.isAdmin,authController.OrderByWeek);
 
-router.get('/OrderOfLastOneMonth/:id',authController.OrderOfLastOneMonth);
+router.get('/OrderOfLastOneMonth/:id',verifyAdmin.isAdmin,authController.OrderOfLastOneMonth);
 
-router.get('/OrderOfLastThreeMonth/:id',authController.OrderOfThreeMonth);
+router.get('/OrderOfLastThreeMonth/:id',verifyAdmin.isAdmin,authController.OrderOfThreeMonth);
 
-router.get('/OrderOfLastSixMonth/:id',authController.OrderOfSixMonth);
+router.get('/OrderOfLastSixMonth/:id',verifyAdmin.isAdmin,authController.OrderOfSixMonth);
 
-router.get('/orderByYear/:id',authController.OrderByYear);
+router.get('/orderByYear/:id',verifyAdmin.isAdmin,authController.OrderByYear);
 
-router.get('/orderByCostumeDate',authController.OrderOfCostumeDate);
+router.get('/orderByCostumeDate',verifyAdmin.isAdmin,authController.OrderOfCostumeDate);
 
 
 module.exports = router;
