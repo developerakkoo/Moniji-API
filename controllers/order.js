@@ -67,6 +67,24 @@ exports.getAllOrder = async (req, res, next) =>{
     }
 }
 
+exports.getOrderById = async(req, res, next) =>{
+    try{
+        const id = req.params.id;
+
+        const order = await Order.findById(id);
+
+        if(order){
+            res.status(200).json({
+                order
+            })
+        }
+    }catch(error){
+        res.status(500).json({
+            error,
+            message: "Something went Wrong!"
+        })
+    }
+}
 exports.updateOrder = async (req, res, next) =>{
 
     try {

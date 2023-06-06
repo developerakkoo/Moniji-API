@@ -4,6 +4,8 @@ const router = express.Router();
 ///get 
 router.get('/order', order.getAllOrder);
 
+router.get('/order/:id', order.getOrderById);
+
 router.get('/order/user/:userid', order.getOrderByUserId);
 //post
 router.post('/order', order.postOrder);
