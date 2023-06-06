@@ -5,58 +5,38 @@ const Schema = mongoose.Schema;
 
 
 const orderSchema = new Schema({
-    products:{
-        type:[Schema.Types.ObjectId],
-        ref:'Product'
-    },
-    diameter:{
-        type: Number,
-        required: [true]
-    },
-
-    length:{
-        type:Number,
-        required: [true]
-    },
-
-    make:{
-        type: String,
-        required: [true]
-    },
-
-    quantity:{
-        type: Number,
-        required: [true]
-    },
-
     orderId:{
         type: Number,
         required: [true]
     },
+    userId:{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+    OrderedProducts:[{
+        productId:{
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+        },
+        Make: { type: String },
+        Type: { type: String },
+        DiaInMm: { type: Number },
+        LengthInMm: { type: Number },
+        units: { type: String },
+        quantity: { type: Number, required: true, default: 1 },
+        
+    }],
     status:{
         type: Number,
         default:1
     },
-
-    type:{
-        type: String,
-        required: [true]
-    },
     message:{
         type: String,
+        default:"N/A"
     },
     isAccepted:{
         type: Boolean,
         default:false
-    },
-
-    isAlternate:{
-        type: Boolean
-    },
-
-    userId:{
-        type: Schema.Types.ObjectId,
-        ref: "User"
     },
     Date:{
         type:String,

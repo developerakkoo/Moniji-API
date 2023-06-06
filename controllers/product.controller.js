@@ -100,27 +100,33 @@ exports.deleteProduct = async (req,res) => {
 }
 
 exports.addProductToOrder = async(req,res) => {
-    const orderId = req.params.orderId;
-    
+    try{    const orderId = req.params.orderId;
 
     const savedOrder = await Order.findOne({_id:orderId});
     if (!savedOrder){
         return res.status(400).send({message:"savedOrder doesn't exists"});
     }
-    const productIds =  req.body.products;
+    const products =  req.body.Products;
     if (req.body.insert ){
-        productIds.forEach(productId => {
-            savedOrder.products.push(productId)
+        products.forEach(product => {
+            savedOrder.OrderedProducts.push(product)
             
-        })}
-    
-        else if (req.body.Delete){
-            const savedProductIds = savedOrder.products.filter((productId)=>{
-                return !productIds.includes(productId.toString());
-            })
-            savedOrder.products=savedProductIds;
-        }
-    
+        });
         const updateOrder = await savedOrder.save();
         return res.status(200).json({message:"Order Updated",updateOrder});
+    }
+        else if (req.body.Delete){
+            const savedProducts = savedOrder.OrderedProducts.filter((product)=>{
+                let Id = product['_id']
+                return !products.includes(Id.toString());
+            })
+            
+            savedOrder.OrderedProducts=savedProducts;
+            const updateOrder = await savedOrder.save();
+            return res.status(200).json({message:"Order Deleted Successfully",updateOrder});
+        }
+        
+    }catch(error){
+        res.status(500).json({message:error.message,status:"ERROR"})
+    }
 }

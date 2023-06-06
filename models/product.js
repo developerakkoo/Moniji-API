@@ -23,6 +23,7 @@ const productSchema = new Schema({
     PartNo:{
         type: String,
     },
+    
 
 }, {timestamps : true})
 

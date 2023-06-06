@@ -6,17 +6,12 @@ const IO = require("./../socket");
 exports.postOrder = async(req, res, next) =>{
     try {
         const orderObj={
-            diameter:req.body.diameter,
-            length:req.body.length,
-            make:req.body.make,
-            quantity:req.body.quantity,
             orderId:uInt32(),
-            type:req.body.type,
             userId:req.body.userId
         }
         const order = await new Order(orderObj);
         await order.save().then((result) => {
-            res.status(201).json({ message: 'order Created Successfully!', status: '201', orderId: result.orderId, });
+            res.status(201).json({ message: 'order Created Successfully!',order, });
             IO.getIO().emit('post:order',order);
         })
         .catch(err => {
