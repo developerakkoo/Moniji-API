@@ -27,7 +27,7 @@ exports.postOrder = async(req, res, next) =>{
 exports.getOrderByUserId = async(req, res, next) =>{
     try{
         const userid = req.params.userid;
-        const order = await Order.findOne({userId: userid}).lean().populate("userId","-password") 
+        const order = await Order.find({userId: userid}).populate("userId","-password") 
         if(order){
             res.status(200).json({
                 order,
