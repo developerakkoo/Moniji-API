@@ -5,6 +5,10 @@ const Schema = mongoose.Schema;
 
 
 const orderSchema = new Schema({
+    products:{
+        type:[Schema.Types.ObjectId],
+        ref:'Product'
+    },
     diameter:{
         type: Number,
         required: [true]

@@ -9,6 +9,8 @@ route.post('/add/product',validateProduct.validateProduct, productController.add
 
 route.put('/update/product/:productId', productController.updateProduct);
 
+route.put('/add/productToOrder/:orderId', productController.addProductToOrder);
+
 route.get('/getAll/product', productController.getAll);
 
 route.get('/getById/product/:productId', productController.productGetById);

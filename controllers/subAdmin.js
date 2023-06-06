@@ -69,7 +69,7 @@ async function postSignup  (req, res, next) {
 async function subAcceptUserReq(req, res, next){
     const savedUser = await User.findById({_id:req.body.id});
     if(!savedUser){
-        return res.status(400).json({message: 'User dose not exist !'});
+        return res.status(404).json({message: 'User dose not exist !'});
     }
     if (!savedSubAdmin.canAcceptUser){
         return  res.status(400).json({message: `you don't have admin permission   to accept user !`});

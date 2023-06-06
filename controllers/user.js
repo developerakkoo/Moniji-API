@@ -18,7 +18,7 @@ async function loginUser(req, res, next)  {
     User.findOne({ email: email })
         .then(user => {
             if (!user) {
-                res.status(400).json({ message: 'User not found', status: 'error' })
+                return res.status(404).json({ message: 'User not found', status: 'error' })
             }
 
             loadedUser = user;
@@ -26,7 +26,7 @@ async function loginUser(req, res, next)  {
             bcrypt.compare(password, user.password)
                 .then(doMatch => {
                     if (!doMatch) {
-                        res.status(400).json({ message: 'Password do not match', status: 'error' })
+                        return res.status(400).json({ message: 'Password do not match', status: 'error' })
 
                     }
 

@@ -1,6 +1,6 @@
-const product = require('../models/product');
-const Product = require('../models/product');
 
+const Product = require('../models/product');
+const Order = require("./../models/order");
 
 
 exports.addProduct = async(req,res) => {
@@ -21,19 +21,13 @@ exports.addProduct = async(req,res) => {
 
 exports.getAll = async(req,res) => {
     try{
-    const pageNumber = req.query.page || 1; // Get the current page number from the query parameters
-    const pageSize = 10; // Number of items per page
-    
-    Product.paginate({}, { page: pageNumber, limit: pageSize }, (err, result) => {
-    if (err) {
-        return res.status(500).json({ message: 'Error occurred while fetching Data.' });
-    }
-    
-    const { docs, total, limit, page, pages } = result;
-    res.json({ Products: docs, total, limit, page, pages });
-    });
+        const savedProduct = await Product.find();
+        if(!savedProduct){
+            return res.status(400).json({message:`Products Not Found.!`})
+        }
+        res.status(200).json({message:'Products Fetched Successfully',count:savedProduct.length,savedProduct})
     }catch(error){
-        console.log(error);
+        
     res.status(500).json({message: error.message, status:`ERROR`});
     }
 }
@@ -103,4 +97,30 @@ exports.deleteProduct = async (req,res) => {
     }catch(error){
         res.status(500).json({message:error.message,status:`ERROR`});
     }
+}
+
+exports.addProductToOrder = async(req,res) => {
+    const orderId = req.params.orderId;
+    
+
+    const savedOrder = await Order.findOne({_id:orderId});
+    if (!savedOrder){
+        return res.status(400).send({message:"savedOrder doesn't exists"});
+    }
+    const productIds =  req.body.products;
+    if (req.body.insert ){
+        productIds.forEach(productId => {
+            savedOrder.products.push(productId)
+            
+        })}
+    
+        else if (req.body.Delete){
+            const savedProductIds = savedOrder.products.filter((productId)=>{
+                return !productIds.includes(productId.toString());
+            })
+            savedOrder.products=savedProductIds;
+        }
+    
+        const updateOrder = await savedOrder.save();
+        return res.status(200).json({message:"Order Updated",updateOrder});
 }

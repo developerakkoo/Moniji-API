@@ -32,7 +32,7 @@ exports.postOrder = async(req, res, next) =>{
 exports.getOrderByUserId = async(req, res, next) =>{
     try{
         const userid = req.params.userid;
-        const order = await Order.find({userId: userid});
+        const order = await Order.findOne({userId: userid}).lean().populate("userId","-password") 
         if(order){
             res.status(200).json({
                 order,
@@ -42,8 +42,10 @@ exports.getOrderByUserId = async(req, res, next) =>{
             IO.getIO.emit('get:order',order);
         }
     }catch (error) {
+        console.log(error); 
         res.status(500).json({
-            message: "Something went wrong!"
+            message: "Something went wrong!",
+            
         })
     }
 }
@@ -51,7 +53,7 @@ exports.getOrderByUserId = async(req, res, next) =>{
 exports.getAllOrder = async (req, res, next) =>{
     try {
         
-        const order = await Order.find({}).populate("userId");
+        const order = await Order.find({}).lean().populate("userId","-password") 
         if(order){
             res.status(200).json({
                 order,
@@ -59,11 +61,13 @@ exports.getAllOrder = async (req, res, next) =>{
                 message: "All Orders"
             })
             IO.getIO.emit('get:order',order);
+            
         }
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             message: "Something went wrong!",
-            error
+            
         })
     }
 }
