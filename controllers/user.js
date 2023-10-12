@@ -66,7 +66,7 @@ async function postSignup (req, res, next) {
         bcrypt.hash(req.body.password, 12)
         .then((hashedPassword) =>{
             const user = new User({
-                password : hashedPassword,
+            password : hashedPassword,
             email : req.body.email,
             name : req.body.name,
             mobileno : req.body.mobileno,

@@ -14,6 +14,10 @@ router.put('/order/:id', order.updateOrder);
 //delete
 router.delete('/order/:id', order.deleteOrder);
 
+router.post('/place/order/:userId',order.placeOrder);
+
+
+router.get('/orderById/:orderId', order.getOrderById);
 
 
 module.exports = router;

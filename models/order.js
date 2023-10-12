@@ -14,10 +14,7 @@ const orderSchema = new Schema({
         ref: "User"
     },
     OrderedProducts:[{
-        productId:{
-            type: Schema.Types.ObjectId,
-            ref: 'Product',
-        },
+        PartNo: { type: String },
         Make: { type: String },
         Type: { type: String },
         DiaInMm: { type: Number },

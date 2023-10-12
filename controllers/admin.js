@@ -426,7 +426,7 @@ async function OrderOfThreeMonth(req, res, next){
         { 
             $match: {
             Month: {
-                $gte: moment().subtract(3, 'months').startOf('isoMonth').format('MM'),
+                $gte: moment().subtract(3, 'months').startOf('isoMonth').format('MM') ,
                 $lte: moment().subtract(1, 'months').endOf('isoMonth').format('MM'),
             },
             },
@@ -567,7 +567,7 @@ async function OrderOfCostumeDate(req, res, next){
     console.log("DONE!");
     }).catch((error) =>{
     console.log(error);
-    })
+    });
     
 }
 

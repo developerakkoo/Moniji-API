@@ -103,9 +103,9 @@ const diskStorage = multer.diskStorage({
       cb(null, true);
     } else {
       cb(null, false);
-    }
+    
   };
-  
+}
   app.use(
     multer({ storage: diskStorage, fileFilter: fileFilter }).single("file")
   );

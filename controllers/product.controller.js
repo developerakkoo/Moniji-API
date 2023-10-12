@@ -1,4 +1,4 @@
-
+const APIFeatures = require('../util/search')
 const Product = require('../models/product');
 const Order = require("./../models/order");
 
@@ -100,8 +100,8 @@ exports.deleteProduct = async (req,res) => {
 }
 
 exports.addProductToOrder = async(req,res) => {
-    try{    const orderId = req.params.orderId;
-
+    try{   
+    const orderId = req.params.orderId;
     const savedOrder = await Order.findOne({_id:orderId});
     if (!savedOrder){
         return res.status(400).send({message:"savedOrder doesn't exists"});
@@ -130,3 +130,28 @@ exports.addProductToOrder = async(req,res) => {
         res.status(500).json({message:error.message,status:"ERROR"})
     }
 }
+
+
+exports.ProductSearchOption = async (req, res, next)=> {
+    try {
+        const query = req.query.query;
+        const term = req.query.term;
+        // console.log(query + term);
+        const features = await new APIFeatures(Product.find(), req.query)
+        .filter()
+        .sort()
+
+        const product = await features.query;
+
+        res.status(200).json({
+        message:'Product Fetched Successfully',
+        status: "success",
+        statusCode: 200,
+        results: product.length,
+        searchData: product,
+        });
+    } catch (err) {
+        console.log(err)
+    res.status(404).json({message: err.message, statusCode:404,status:`ERROR`});
+    }
+};

@@ -17,4 +17,6 @@ route.get('/getById/product/:productId', productController.productGetById);
 
 route.delete('/delete/product/:productId', productController.deleteProduct);
 
+route.get('/product/search',productController.ProductSearchOption)
+
 module.exports = route;
