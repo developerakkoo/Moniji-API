@@ -13,7 +13,7 @@ class APIFeatures {
 
         //console.log(req.query, queryObj);
 
-        //2) Advanced Filtering
+        //2) Advanced Filtering//
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gte|gt|lte|le)\b/g, (match) => `$${match}`);
 
