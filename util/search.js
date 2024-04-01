@@ -28,7 +28,7 @@ class APIFeatures {
     sort() {
         if (this.queryStr.sort) {
             const sortBy = this.queryStr.sort.split(',').join(' ');
-            console.log(sortBy,'..');
+            // console.log(sortBy,'..');
             this.query = this.query.sort(sortBy);
         } else {
             this.query.sort('-createdAt'); // To Show up new ones first
@@ -58,7 +58,7 @@ class APIFeatures {
         //&page=1&limit=3
         this.query = this.query.skip(skip).limit(limit);
 
-        console.log(`Skip value:- ${skip}`);
+        // console.log(`Skip value:- ${skip}`);
         return this;
     }
 }
